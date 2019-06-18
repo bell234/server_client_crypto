@@ -1,21 +1,19 @@
 #include <iostream>
-#include <string.h>
 #include "ServerOP.h"
-#include <string>
-
 using namespace std;
 
 
-int clientFunc() {
+int serverFunc() {
 
-
-
+	ServerOP op("server.json");
+	op.startServer();
 	return 0;
 }
 
+
 int main(int argc, char *argv[]) {
 	//¿Í»§¶Ëº¯Êý
-	clientFunc();
+	serverFunc();
 
 	return 0;
 }

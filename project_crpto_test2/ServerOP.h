@@ -4,7 +4,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <iostream>
 #include "msg.pb.h"
+using namespace std;
 
 // 存储磁盘配置文件信息
 struct ServerInfo

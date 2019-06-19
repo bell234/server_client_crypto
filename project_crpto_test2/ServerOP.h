@@ -35,11 +35,20 @@ public:
 
 	// 操作
 	void startServer();
+	//密钥协商
 	string seckeyArgee(RequestMsg* msg);
 
+	// 根据协商结果创建 线程的回调函数2种方式
 	friend void* working(void* arg);
-	// 线程的回调函数
 	static void* hardWork(void* arg) {}
+
+	//密钥校验
+	string seckeyVertify(RequestMsg* msg);//check;
+
+	//密钥注销
+	string seckeyLogout(RequestMsg* msg);
+
+	
 
 private:
 	string getRandStr(KeyLen num);

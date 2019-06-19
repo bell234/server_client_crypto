@@ -62,7 +62,7 @@ void ServerOP::startServer()
 
 void* working(void* arg)
 {
-	usleep(100);
+	usleep(100);//此处目的是为了map方便插入键值对
 	//得到通信套接字
 	ServerOP* op = (ServerOP*)arg;
 	//得到通信的套接字对象
@@ -85,6 +85,7 @@ void* working(void* arg)
 		break;
 	case 2:
 		//密钥校验
+	
 		break;
 	case 3:
 		//密钥注销
@@ -120,7 +121,7 @@ string ServerOP::seckeyArgee(RequestMsg* msg)
 	ofs.close();
 
 	cout << "磁盘上生成了公钥文件。。。" << endl;
-	RSACrypto rsa(fileName, false);
+	RSACrypto rsa(fileName, false);//false为公钥
 	//2校验签名
 	//保证rsa对象中公钥是可用的
 	RespondInfo info;
@@ -157,8 +158,7 @@ string ServerOP::seckeyArgee(RequestMsg* msg)
 
 	return sendMsg;
 }
-//参数： num == 16 24 32
-//改成枚举
+//获取随机字符串
 string ServerOP::getRandStr(KeyLen num)
 {	//以当前时间为种子
 	srand((unsigned int)time(NULL));
@@ -182,3 +182,17 @@ string ServerOP::getRandStr(KeyLen num)
 	}
 	return string();
 }
+
+//密钥验证
+string ServerOP::seckeyVertify(RequestMsg* msg)
+{
+	return string();
+}
+//密钥注销
+string ServerOP::seckeyLogout(RequestMsg* msg)
+{
+	return string();
+}
+//参数： num == 16 24 32
+//改成枚举
+

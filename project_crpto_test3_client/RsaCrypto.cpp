@@ -1,11 +1,8 @@
 #include "RsaCrypto.h"
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#include <openssl/buffer.h>
 #include <iostream>
-
-
-
-
 
 //	RSA* m_publicKey;//公钥
 //	RSA* m_privateKey;
@@ -35,6 +32,21 @@ RSACrypto::RSACrypto(string fileName, bool isPrivate) {
 RSACrypto::~RSACrypto() {
 	RSA_free(this->m_privateKey);
 	RSA_free(this->m_publicKey);
+}
+//将公钥/私钥字符串数据解析到RSA对象中
+void RSACrypto::parseKeyString(string keystr, bool pubKey)
+{
+	//字符串数据-->BIO对象中
+	BIO* bio = BIO_new_mem_buf(keystr.data(), keystr.size());
+	//公钥字符串
+	if (pubKey) {
+		PEM_read_bio_RSAPublicKey(bio, &m_publicKey, NULL, NULL);
+	}
+	else {
+		//私钥字符串
+		PEM_read_bio_RSAPrivateKey(bio, &m_privateKey, NULL, NULL);
+	}
+	BIO_free(bio);
 }
 
 //生成RSA密钥对
@@ -74,6 +86,7 @@ void RSACrypto::generateKeyFile(int bits, string pub, string pri) {
 }
 //公钥加密
 string RSACrypto::rsaPubKeyEncrypt(string data) {
+	cout << "加密数据长度" << data.size() << endl;
 	//计算公钥长度
 	int keyLen = RSA_size(m_publicKey);
 	cout << "pbulic key length is: 公钥长度为：" << keyLen << endl;
@@ -87,20 +100,25 @@ string RSACrypto::rsaPubKeyEncrypt(string data) {
 	string retStr = string();
 	if (ret >= 0) {
 		//加密成功
-		retStr = string(encode, ret);
+		cout << "ret :" << ret << ", keyLen: " << keyLen << endl;
+		retStr = toBase64(encode, ret);
+	}
+	else {
+		ERR_print_errors_fp(stdout);
 	}
 	delete[] encode;
 	return retStr;
 }
 //私钥解密
 string RSACrypto::rsaPriKeyDecrypt(string encData) {
+	char* text = fromBase64(encData);
 	//计算私钥长度
 	int keyLen = RSA_size(m_privateKey);
 	//根据长度申请内存
 	char* decode = new char[keyLen + 1];
 
 	//使用私钥解密
-	int ret = RSA_private_decrypt(encData.size(), (const unsigned char*)encData.data(),
+	int ret = RSA_private_decrypt(keyLen, (const unsigned char*)text,
 		(unsigned char*)decode, m_privateKey, RSA_PKCS1_PADDING);
 
 	string retStr = string();
@@ -108,7 +126,12 @@ string RSACrypto::rsaPriKeyDecrypt(string encData) {
 		//解密成功
 		retStr = string(decode, ret);
 	}
+	else {
+		cout << "私钥解密失败" << endl;
+		ERR_print_errors_fp(stdout);
+	}
 	delete[] decode;
+	delete[] text;
 	return retStr;
 }
 //使用RSA签名
@@ -125,22 +148,58 @@ string RSACrypto::rsaSign(string data, SignLevel level) {
 	delete[] signBuf;
 	return retStr;
 }
-#if 1
+
 //使用RSA验证签名
 bool RSACrypto::rsaVertifySign(string data, string signData, SignLevel level ) {
+	//验证签名
+	int keyLen = RSA_size(m_publicKey);
+	char* sign = fromBase64(signData);
 	int ret = RSA_verify(level, (unsigned char*)data.data(), data.size(),
 		(const unsigned char*)signData.data(), signData.size(), m_publicKey);
+	if (ret == -1) {
+		ERR_print_errors_fp(stdout);
+	}
 	if (ret != 1) {
 		return false;
 	}
 	return true;
 }
-#endif
+string RSACrypto::toBase64(const char* str, int len)
+{
+	BIO* mem = BIO_new(BIO_s_mem());
+	BIO* base64 = BIO_new(BIO_f_base64());
+	//mem添加到base64中
+	base64 = BIO_push(base64, mem);
+	//写数据
+	BIO_write(base64, str, len);
+	BIO_flush(base64);
+	//得到内存对象指针
+	BUF_MEM* memPtr;
+	BIO_get_mem_ptr(base64, &memPtr);
+	string retStr = string(memPtr->data, memPtr->length - 1);
+	BIO_free_all(base64);
+	return retStr;
+}
+char* RSACrypto::fromBase64(string str)
+{
+	int length = str.size();
+	BIO* base64 = BIO_new(BIO_f_base64());
+	BIO* mem = BIO_new_mem_buf(str.data(), length);
+	BIO_push(base64, mem);
+	char* buffer = new char[length];
+	//memset(buffer, 0, length);
+	BIO_read(base64, buffer, length);
+	BIO_free_all(base64);
+	return buffer;
+}
+
 //private:
 	//获取公钥是否成功
 bool RSACrypto::initPublicKey(string pubfile) {
+
 	//创建bio对象			//操作的磁盘文件  操作文件的方式
 	BIO* pubBio = BIO_new_file(pubfile.data(), "r");
+	//将bio中的pem数据读出来
 	if (!PEM_read_bio_RSAPublicKey(pubBio, &m_publicKey, NULL, NULL)) {
 		ERR_print_errors_fp(stdout);
 		return false;
@@ -158,6 +217,7 @@ bool RSACrypto::initPublicKey(string pubfile) {
 
 	//获取私钥是否成功
 bool RSACrypto::initPrivateKey(string prifile) {
+
 	BIO* priBio = BIO_new_file(prifile.data(), "r");
 	if (!PEM_read_bio_RSAPrivateKey(priBio, &m_privateKey, NULL, NULL)) {
 		ERR_print_errors_fp(stdout);

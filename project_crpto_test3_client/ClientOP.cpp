@@ -7,6 +7,7 @@
 #include <json/json.h>//json c++文件
 #include <fstream>
 #include "Hash.h"
+#include <sstream>
 #include <string.h>
 #include <string>
 
@@ -64,7 +65,7 @@ bool ClientOP::seckeyAgree()
 	//创建哈希对象
 	Hash hash(T_SHA1);
 	hash.addData(strBuf.str());
-	string s1 = hash.result();
+	string sh1 = hash.result();
 	reqInfo.sign = crypto.rsaSign(sh1);
 	cout << "签名成功" << "公钥信息" << endl;
 	//获取给服务器发送的数据 rsa公钥
@@ -95,7 +96,7 @@ bool ClientOP::seckeyAgree()
 
 	//4判断状体
 	bool ret = true;
-	if (!resMsg->status) {
+	if (!resMsg->status()) {
 		cout << "服务器处理请求失败。。。" << endl;
 		ret = false;
 	}

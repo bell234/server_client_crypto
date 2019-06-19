@@ -1,7 +1,18 @@
 #include <iostream>
 #include "ClientOP.h"
 #include <string>
+
 using namespace std;
+
+extern int usage();
+extern int clientFunc();
+
+int main(int argc, char* argv[]) {
+	//客户端函数
+	clientFunc();
+
+	return 0;
+}
 
 int usage() {
 	int nSel = -1;
@@ -43,15 +54,13 @@ int clientFunc() {
 			op.seckeyLogout();
 			// 密钥注销
 			break;
+		default :
+			printf("请输入正确的序号!\n");
+			break;
 		}
 	}
 	return 0;
 }
 
 
-int main(int argc, char *argv[]) {
-	//客户端函数
-	clientFunc();
 
-	return 0;
-}

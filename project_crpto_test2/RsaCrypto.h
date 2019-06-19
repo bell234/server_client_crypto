@@ -23,6 +23,8 @@ public:
 	RSACrypto(string fileName, bool isPrivate = true);
 	~RSACrypto();
 
+	//通过解析字符串得到密钥
+	void parseKeyString(string keystr, bool pubkey = true);
 	//生成RSA密钥对
 	void generateKeyFile(int bits, string pub = "public.pem", string pri = "private.pem");
 	//公钥加密
@@ -34,6 +36,9 @@ public:
 	//使用RSA验证签名
 	bool rsaVertifySign(string data, string signData, SignLevel level = Level3);
 private:
+	string toBase64(const char* str, int len);
+	//base64解码
+	char* fromBase64(string str);
 	//获取公钥
 	bool initPublicKey(string pubfile);
 	//获取私钥

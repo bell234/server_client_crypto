@@ -1,4 +1,4 @@
-#include "TcpSocket.h"
+ï»¿#include "TcpSocket.h"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -12,45 +12,45 @@
 #include <sys/time.h>
 
 
-//int m_socket; //Í¨ĞÅÌ×½Ó×Ö
+//int m_socket; //é€šä¿¡å¥—æ¥å­—
 TcpSocket::TcpSocket() {
 	
 }
-//Ê¹ÓÃÒ»¸ö¿ÉÒÔÓÃÓÚÍ¨ĞÅµÄÌ×½Ó×ÖÊµÀı»¯Ì×½Ó×Ö¶ÔÏó
+//ä½¿ç”¨ä¸€ä¸ªå¯ä»¥ç”¨äºé€šä¿¡çš„å¥—æ¥å­—å®ä¾‹åŒ–å¥—æ¥å­—å¯¹è±¡
 TcpSocket::TcpSocket(int connfd) {
 	this->m_socket = connfd;
 }
 TcpSocket::~TcpSocket() {
 
 }
-//Á¬½Ó·şÎñÆ÷
+//è¿æ¥æœåŠ¡å™¨
 int TcpSocket::connectToHost(string ip, unsigned short port, int timeOut) {
 	int ret = 0;
 	if (port <= 0 || port > 65535 || timeOut < 0) {
 		printf("(port <= 0 || port > 65535 || timeOut < 0) error!\n");
 		return ret = 0;
 	}
-	//ĞÂ½¨Ì×½Ó×Ö
+	//æ–°å»ºå¥—æ¥å­—
 	if (0 > (this->m_socket = socket(AF_INET, SOCK_STREAM, 0))) {
 		ret = errno;
 		printf("socket(AF_INET, SOCK_STREAM, 0)) error : %d\n", ret);
 		return ret;
 	}
-	////¶Ë¿Ú¸´ÓÃ
+	////ç«¯å£å¤ç”¨
 	//int op = 0;
 	//if (-1 == (ret = setsockopt(this->m_socket, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int)))) {
 	//	ret = errno;
 	//	printf("setsockopt(this->m_socket, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int))error : %d\n", ret);
 	//	return ret;
 	//}
-	//°ó¶¨¶Ë¿Ú¼°µØÖ·
+	//ç»‘å®šç«¯å£åŠåœ°å€
 	struct sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
 	serverAddr.sin_addr.s_addr = inet_addr(ip.data());
-	//½¨Á¢Á¬½Ó
+	//å»ºç«‹è¿æ¥
 	if (0 > (ret = connectTimeOut((struct sockaddr_in*) & serverAddr, timeOut))) {
-		//³¬Ê±
+		//è¶…æ—¶
 		if (ret == -1 && errno == ETIMEDOUT) {
 			ret = TimeOutError;
 			return ret;
@@ -62,10 +62,10 @@ int TcpSocket::connectToHost(string ip, unsigned short port, int timeOut) {
 	}
 	return ret;	
 }
-//·¢ËÍÊı¾İ
+//å‘é€æ•°æ®
 int TcpSocket::sendMsg(string sendData, int timeOut) {
 
-	//·µ»Ø0==>Ã»³¬Ê±   -1==>³¬Ê±
+	//è¿”å›0==>æ²¡è¶…æ—¶   -1==>è¶…æ—¶
 	int ret = writeTimeOut(timeOut);
 
 	if (ret == 0) {
@@ -77,12 +77,13 @@ int TcpSocket::sendMsg(string sendData, int timeOut) {
 			printf("func sendMsg malloc(writeDataLen) netData == NULL error");
 			return ret;
 		}
-		//×ª»»ÍøÂç×Ö½ÚĞò
+		//è½¬æ¢ç½‘ç»œå­—èŠ‚åº
 		int netLen = htonl(sendData.size());
-		strncpy((char*)netData, (const char*)&netLen, 4);//×¢Òâ
+		//strncpy((char*)netData, (const char*)&netLen, 4);//æ³¨æ„
+		memcpy(netData, &netLen, 4);
 		memcpy(netData + 4, sendData.data(), sendData.size());
 
-		//Ã»ÎÊÌâ·¢ËÍÊµ¼Ê×Ö½ÚÊı ==dataLen
+		//æ²¡é—®é¢˜å‘é€å®é™…å­—èŠ‚æ•° ==dataLen
 		writed = writen(netData, writeDataLen);
 		if (writed < writeDataLen) {
 			if (netData != NULL) {
@@ -92,7 +93,7 @@ int TcpSocket::sendMsg(string sendData, int timeOut) {
 			printf("TcpSocket::sendMsg writen writed < total length!\n");
 			return writed;
 		}
-		//Ğ´ÍêÊÍ·ÅÄÚ´æ
+		//å†™å®Œé‡Šæ”¾å†…å­˜
 		if (netData != NULL) {
 			free(netData);
 			netData = NULL;
@@ -107,9 +108,9 @@ int TcpSocket::sendMsg(string sendData, int timeOut) {
 
 	return ret;
 }
-//½ÓÊÕÊı¾İ
+//æ¥æ”¶æ•°æ®
 string TcpSocket::recvMsg(int timeOut) {
-	//·µ»Ø0 Ã»ÓĞ³¬Ê±¾ÍÊÕµ½Êı¾İ£¬  -1³¬Ê±»òÓĞÒì³£
+	//è¿”å›0 æ²¡æœ‰è¶…æ—¶å°±æ”¶åˆ°æ•°æ®ï¼Œ  -1è¶…æ—¶æˆ–æœ‰å¼‚å¸¸
 	int ret = readTimeOut(timeOut);
 	if (ret != 0) {
 		if (ret == -1 || errno == ETIMEDOUT) {
@@ -123,7 +124,7 @@ string TcpSocket::recvMsg(int timeOut) {
 	}
 
 	int recvDataLen = 0;
-	ret = readn(&recvDataLen, 4);//¶Á°üÍ·ËÄ¸ö×Ö½Ú
+	ret = readn(&recvDataLen, 4);//è¯»åŒ…å¤´å››ä¸ªå­—èŠ‚
 	if (ret == -1) {
 		printf("func readn() err:%d\n", ret);
 		return string();
@@ -132,7 +133,7 @@ string TcpSocket::recvMsg(int timeOut) {
 		printf("func readn() err closed:%d \n", ret);
 		return string();
 	}
-	//¸ù¾İ¶Á°üÍ·Ç°ËÄ¸ö×Ö½Ú×ª»»µÄ³¤¶È  ÉêÇëÄÚ´æ
+	//æ ¹æ®è¯»åŒ…å¤´å‰å››ä¸ªå­—èŠ‚è½¬æ¢çš„é•¿åº¦  ç”³è¯·å†…å­˜
 	int n = ntohl(recvDataLen);
 	char* tmpBuf = (char*)malloc(n + 1);
 	if (tmpBuf == NULL) {
@@ -140,7 +141,7 @@ string TcpSocket::recvMsg(int timeOut) {
 		printf("malloc() err\n");
 		return NULL;
 	}
-	ret = readn(tmpBuf, n);//¸ù¾İ³¤¶È¶ÁÈ¡Êı¾İ
+	ret = readn(tmpBuf, n);//æ ¹æ®é•¿åº¦è¯»å–æ•°æ®
 	if(ret == -1){
 		printf("func TcpSocket::recvMsg readn err: %d\n", ret);
 		return string();
@@ -149,11 +150,11 @@ string TcpSocket::recvMsg(int timeOut) {
 		printf("func TcpSocket::recvMsg readn() peer closed:%d\n", ret);
 		return string();
 	}
-	tmpBuf[n] = '\0';//Êı×éÎ²²¿²¹0
+	tmpBuf[n] = '\0';//æ•°ç»„å°¾éƒ¨è¡¥0
 	string data = string(tmpBuf);
 	return data;
 }
-//¶Ï¿ªÁ¬½Ó
+//æ–­å¼€è¿æ¥
 void TcpSocket::disConnect() {
 	if (this->m_socket >= 0) {
 		close(this->m_socket);
@@ -162,7 +163,7 @@ void TcpSocket::disConnect() {
 
 
 //private:
-//ÉèÖÃIO·Ç×èÈûÄ£Ê½
+//è®¾ç½®IOéé˜»å¡æ¨¡å¼
 int TcpSocket::setNonBlock(int fd) {
 	int ret = 0, flags = 0;
 
@@ -174,7 +175,7 @@ int TcpSocket::setNonBlock(int fd) {
 
 	return ret;
 }
-//ÉèÖÃÎª×èÈûÄ£Ê½
+//è®¾ç½®ä¸ºé˜»å¡æ¨¡å¼
 int TcpSocket::setBlock(int fd) {
 	int ret = 0, flags = 0;
 
@@ -186,7 +187,7 @@ int TcpSocket::setBlock(int fd) {
 
 	return ret;
 }
-//¶Á³¬Ê±¼ì²â	²»º¬¶Á²Ù×÷
+//è¯»è¶…æ—¶æ£€æµ‹	ä¸å«è¯»æ“ä½œ
 int TcpSocket::readTimeOut(unsigned int wait_seconds) {
 	int ret = 0;
 	if (wait_seconds > 0) {
@@ -211,7 +212,7 @@ int TcpSocket::readTimeOut(unsigned int wait_seconds) {
 	}
 	return ret;
 }
-//Ğ´³¬Ê±¼ì²âº¯Êı	²»º¬Ğ´²Ù×÷
+//å†™è¶…æ—¶æ£€æµ‹å‡½æ•°	ä¸å«å†™æ“ä½œ
 int TcpSocket::writeTimeOut(unsigned int wait_seconds) {
 	int ret = 0;
 	if (wait_seconds > 0) {
@@ -227,7 +228,7 @@ int TcpSocket::writeTimeOut(unsigned int wait_seconds) {
 		do {
 			ret = select(this->m_socket + 1, NULL, &writeTimeOutSet, NULL, &timeout);
 		} while (ret < 0 && errno == EINTR);
-		//Ã»ÓĞ³¬Ê±
+		//æ²¡æœ‰è¶…æ—¶
 		if (ret == 1) {
 			ret = 0;
 		}
@@ -238,7 +239,7 @@ int TcpSocket::writeTimeOut(unsigned int wait_seconds) {
 	}
 	return ret;
 }
-//Á¬½Ó³¬Ê±µÄconnectº¯Êı
+//è¿æ¥è¶…æ—¶çš„connectå‡½æ•°
 int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_seconds) {
 	int ret = 0, sockLen = 0;
 	if (addr == NULL || wait_seconds <= 0) {
@@ -246,13 +247,13 @@ int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_second
 		printf("(addr == NULL || wait_seconds < 0) errno : %d\n", ret);
 		return ret;
 	}
-	//ÅĞ¶ÏÊ±³¤ÉèÖÃÎª·Ç×èÈû
+	//åˆ¤æ–­æ—¶é•¿è®¾ç½®ä¸ºéé˜»å¡
 	if (wait_seconds > 0) {
 		setNonBlock(this->m_socket);
 	}
 	sockLen = sizeof(sockaddr_in);
 	ret = connect(this->m_socket, (struct sockaddr*)addr, sockLen);
-	//ÉèÖÃÎª·Ç×èÈûÁ¬½Ó·µ»Ø-1²¢ÇÒerrno=EINPROGRESS±íÊ¾Á¬½Ó½øĞĞÖĞ
+	//è®¾ç½®ä¸ºéé˜»å¡è¿æ¥è¿”å›-1å¹¶ä¸”errno=EINPROGRESSè¡¨ç¤ºè¿æ¥è¿›è¡Œä¸­
 	if (ret < 0 && errno == EINPROGRESS) {
 
 		fd_set connect_fdset;		
@@ -266,26 +267,26 @@ int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_second
 		do {
 			ret = select(this->m_socket + 1, NULL, &connect_fdset, NULL, &timeout);
 		} while (ret < 0 && errno == EINTR);
-		//±íÊ¾Ì×½Ó×Ö¿ÉĞ´£¬1³É¹¦Á¬½Ó£¬2Ì×½Ó×Ö²úÉú´íÎó
-		//´íÎóĞÅÏ¢²»»á±£´æÔÚerrnoÖĞ£¬ĞèÒªµ÷ÓÃgetsockopt»ñÈ¡
+		//è¡¨ç¤ºå¥—æ¥å­—å¯å†™ï¼Œ1æˆåŠŸè¿æ¥ï¼Œ2å¥—æ¥å­—äº§ç”Ÿé”™è¯¯
+		//é”™è¯¯ä¿¡æ¯ä¸ä¼šä¿å­˜åœ¨errnoä¸­ï¼Œéœ€è¦è°ƒç”¨getsockoptè·å–
 		if (ret == 1) {
 			int err = 0, sockOptRet = 0;
 			socklen_t sockLen = sizeof(err);
-			//»ñÈ¡ÊÇ·ñ³öÏÖ´íÎó¼°×´Ì¬
+			//è·å–æ˜¯å¦å‡ºç°é”™è¯¯åŠçŠ¶æ€
 			if(-1==(sockOptRet = getsockopt(this->m_socket, SOL_SOCKET, SO_ERROR, &err, &sockLen))){		
 				printf("func TcpSocket::connectTimeOut getsockopt(this->m_socket, SOL_SOCKET, SO_ERROR, &err, &sockLen) error!\n");
 				return -1;
 			}
-			//³É¹¦½¨Á¢Á¬½Ó
+			//æˆåŠŸå»ºç«‹è¿æ¥
 			if (err == 0) {
 				ret = 0;
 			}
-			else {//Á¬½ÓÊ§°Ü
+			else {//è¿æ¥å¤±è´¥
 				errno = err;
 				ret = -1;
 			}
 		}
-		//³¬Ê±
+		//è¶…æ—¶
 		else if (ret == 0) {
 			ret = -1;
 			errno = ETIMEDOUT;
@@ -299,18 +300,18 @@ int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_second
 	}
 	return ret;
 }
-//Ã¿´Î´Ó»º³åÇø¶ÁÈ¡n¸ö×Ö·û
+//æ¯æ¬¡ä»ç¼“å†²åŒºè¯»å–nä¸ªå­—ç¬¦
 int TcpSocket::readn(void* buf, int count) {
 	size_t dataLeft = count;
 	size_t dataRead;
 	char* tmpBuf = (char*)buf;
 	while (dataLeft > 0) {
 		if ((dataRead = read(this->m_socket, tmpBuf, dataLeft)) < 0) {
-			//µ±·µ»ØÖµĞ¡ÓÚÖ¸¶¨µÄ×Ö½ÚÊıÊ±
-			//²¢²»ÒâÎ¶×Å´íÎó; Õâ¿ÉÄÜÊÇÒòÎªµ±Ç°¿É¶ÁÈ¡µÄ×Ö½ÚÊıĞ¡ÓÚÖ¸¶¨µÄ
-				//×Ö½ÚÊı(±ÈÈçÒÑ¾­½Ó½üÎÄ¼ş½áÎ², »òÕßÕıÔÚ´Ó¹ÜµÀ»òÕßÖÕ¶Ë¶ÁÈ¡Êı¾İ, »òÕß
-					//read()±»ĞÅºÅÖĞ¶Ï).
-			//¶ÁÈ¡Êı¾İÒÔÇ°±»ĞÅºÅÖĞ¶Ï
+			//å½“è¿”å›å€¼å°äºæŒ‡å®šçš„å­—èŠ‚æ•°æ—¶
+			//å¹¶ä¸æ„å‘³ç€é”™è¯¯; è¿™å¯èƒ½æ˜¯å› ä¸ºå½“å‰å¯è¯»å–çš„å­—èŠ‚æ•°å°äºæŒ‡å®šçš„
+				//å­—èŠ‚æ•°(æ¯”å¦‚å·²ç»æ¥è¿‘æ–‡ä»¶ç»“å°¾, æˆ–è€…æ­£åœ¨ä»ç®¡é“æˆ–è€…ç»ˆç«¯è¯»å–æ•°æ®, æˆ–è€…
+					//read()è¢«ä¿¡å·ä¸­æ–­).
+			//è¯»å–æ•°æ®ä»¥å‰è¢«ä¿¡å·ä¸­æ–­
 			if (errno == EINTR) {
 				continue;
 			}
@@ -324,7 +325,7 @@ int TcpSocket::readn(void* buf, int count) {
 	}
 	return count;
 }
-//Ã¿´ÎÍù»º³åÇøÖĞĞ´Èën¸ö×Ö·û
+//æ¯æ¬¡å¾€ç¼“å†²åŒºä¸­å†™å…¥nä¸ªå­—ç¬¦
 
 int TcpSocket::writen(const void* buf, int count) {
 	size_t dataLeft = count;

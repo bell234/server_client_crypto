@@ -1,4 +1,4 @@
-#include "TcpServer.h"
+ï»¿#include "TcpServer.h"
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 
 
-//int m_lfd;//ÓÃÓÚ¼àÌýµÄÎÄ¼þÃèÊö·û
+//int m_lfd;//ç”¨äºŽç›‘å¬çš„æ–‡ä»¶æè¿°ç¬¦
 TcpServer::TcpServer() {
 
 }
@@ -16,7 +16,7 @@ TcpServer::~TcpServer() {
 
 }
 
-//·þÎñÆ÷ÉèÖÃ¼àÌý
+//æœåŠ¡å™¨è®¾ç½®ç›‘å¬
 int TcpServer::setListen(unsigned short port, const char* ip) {
 	int ret = 0;
 	if (port > 65535 || port < 0) {
@@ -25,20 +25,20 @@ int TcpServer::setListen(unsigned short port, const char* ip) {
 		
 		return ret;
 	}
-	//´´½¨Ì×½Ó×Ö
+	//åˆ›å»ºå¥—æŽ¥å­—
 	if(-1 == (this->m_lfd = socket(AF_INET, SOCK_STREAM, 0))){
 		ret = errno;
-		printf("func TcpServer::setListen socket(AF_INET, SOCK_STREAM, 0) err£º %d\n", ret);
+		printf("func TcpServer::setListen socket(AF_INET, SOCK_STREAM, 0) errï¼š %d\n", ret);
 		return ret;
 	}
-	//¶Ë¿Ú¸´ÓÃ
+	//ç«¯å£å¤ç”¨
 	int op = 0;
 	if (-1 == (ret = setsockopt(this->m_lfd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int)))) {
 		ret = errno;
 		printf("func func TcpServer::setListen setsockopt(this->m_socket, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int))error : %d\n", ret);
 		return ret;
 	}
-	//°ó¶¨¶Ë¿Ú
+	//ç»‘å®šç«¯å£
 	struct sockaddr_in serveraddr;
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
@@ -54,14 +54,14 @@ int TcpServer::setListen(unsigned short port, const char* ip) {
 		serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	}
 
-	////¿ªÊ¼°ó¶¨
+	////å¼€å§‹ç»‘å®š
 	if (-1 == (ret = bind(this->m_lfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr)))) {
 		ret = errno;
 		printf("func TcpServer::setListen bind(this->m_lfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr) err:%d\n", ret);
 		return ret;
 	}
 
-	//¼àÌý
+	//ç›‘å¬
 	if (-1 == (ret = listen(this->m_lfd, 128))) {
 		ret = errno;
 		printf("func TcpServer::setListen listen(this->m_lfd, 128) err: %d\n", ret);
@@ -70,10 +70,10 @@ int TcpServer::setListen(unsigned short port, const char* ip) {
 	return ret;
 }
 
-//µÈ´ý²¢½ÓÊÜ¿Í»§¶ËÁ¬½ÓÇëÇó£¬Ä¬ÈÏÁ¬½Ó³¬Ê±Ê±¼äÎª10000s
+//ç­‰å¾…å¹¶æŽ¥å—å®¢æˆ·ç«¯è¿žæŽ¥è¯·æ±‚ï¼Œé»˜è®¤è¿žæŽ¥è¶…æ—¶æ—¶é—´ä¸º10000s
 TcpSocket* TcpServer::acceptConnectSelect(int wait_seconds) {
 	int ret = 0;
-	//ÅÐ¶ÏselectÊ±¼äÅÐ¶¨£¬Èý´ÎÎÕÊÖÍê³É£¬ ¿Í»§¶ËÓÐÐÂµÄÁ¬½Ó
+	//åˆ¤æ–­selectæ—¶é—´åˆ¤å®šï¼Œä¸‰æ¬¡æ¡æ‰‹å®Œæˆï¼Œ å®¢æˆ·ç«¯æœ‰æ–°çš„è¿žæŽ¥
 	if (wait_seconds > 0) {
 		fd_set accept_fdset;
 		FD_ZERO(&accept_fdset);
@@ -91,9 +91,9 @@ TcpSocket* TcpServer::acceptConnectSelect(int wait_seconds) {
 		}
 	}
 
-	//¿Í»§¶ËÐÂµÄÁ¬½Ó ´ËÊ±µ÷ÓÃaccpet ½«²»»á×èÈû
+	//å®¢æˆ·ç«¯æ–°çš„è¿žæŽ¥ æ­¤æ—¶è°ƒç”¨accpet å°†ä¸ä¼šé˜»å¡ž
 	struct sockaddr_in clientaddr;
-	socklen_t clientaddrLen = sizeof(clientaddr);//sizeof(sockadd_in)
+	socklen_t clientaddrLen = sizeof(struct sockaddr_in);//sizeof(clientaddr)
 	int connfd = accept(this->m_lfd, (struct sockaddr*) & clientaddr, &clientaddrLen);
 	if (connfd == -1) {
 		printf("func TcpServer::acceptConnect accept(this->m_lfd, (struct sockaddr*) & clientaddr, &clientaddrLen) connfd\n");

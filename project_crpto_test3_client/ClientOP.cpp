@@ -1,34 +1,31 @@
-
-#include "ClientOP.h"
+ï»¿#include "ClientOP.h"
 #include "RequestFactory.h"
 #include "RespondFactory.h"
 #include "RsaCrypto.h"
 #include "TcpSocket.h"
-#include <json/json.h>//json c++ÎÄ¼ş
-#include <fstream>
 #include "Hash.h"
+#include <json/json.h>//json c++æ–‡ä»¶
+#include <fstream>
 #include <sstream>
-#include <string.h>
-#include <string>
 
 ClientOP::ClientOP(string fileName)
 {
-	//1¶Á´ÅÅÌµÄJSONÎÄ¼ş
+	//1è¯»ç£ç›˜çš„JSONæ–‡ä»¶
 	//value-->m_info
-	//´´½¨Á÷¶ÔÏó-->¶ÁÎÄ¼şifstream
+	//åˆ›å»ºæµå¯¹è±¡-->è¯»æ–‡ä»¶ifstream
 	ifstream ifs(fileName);
-	//Ê¹ÓÃjsoncpp reader -->value
+	//ä½¿ç”¨jsoncpp è¯»å–reader -->value
 	Json::Reader jsonReader;
 	Json::Value jsonValue;
 	jsonReader.parse(ifs, jsonValue);
-	//½«Êı¾İ´ÓvalueÖĞ¶Á³öÀ´
+	//å°†æ•°æ®ä»valueä¸­è¯»å‡ºæ¥
 	m_info.clientID = jsonValue["clientID"].asString();
 	m_info.serverID = jsonValue["serverID"].asString();
 	m_info.serverIP = jsonValue["serverIP"].asString();
 	m_info.shmKey = jsonValue["shmKey"].asString();
-
 	m_info.port = jsonValue["serverPort"].asInt();
 	m_info.maxNode = jsonValue["maxNode"].asInt();
+	cout << "m_info.client" << m_info.clientID <<"hello"<< m_info.serverIP << m_info.port << endl;
 }
 
 ClientOP::~ClientOP()
@@ -36,80 +33,81 @@ ClientOP::~ClientOP()
 	
 }
 /*
-	×¼±¸£º¶Ô³Æ¼ÓÃÜµÄÃÜÔ¿£¬Í¨¹ı·Ç¶Ô³Æ¼ÓÃÜµÄ·½Ê½Íê³ÉÃÜÔ¿½»»»
-		Êı¾İ·¢ËÍ£º Í¨¹ıprotobufĞòÁĞ»¯Ö®ºóµÄ½á¹¹ÌåA
-		Êı¾İ½ÓÊÕ£º Í¨¹ıprotobufĞòÁĞ»¯Ö®ºóµÄ½á¹¹ÌåB
+	å‡†å¤‡ï¼šå¯¹ç§°åŠ å¯†çš„å¯†é’¥ï¼Œé€šè¿‡éå¯¹ç§°åŠ å¯†çš„æ–¹å¼å®Œæˆå¯†é’¥äº¤æ¢
+		æ•°æ®å‘é€ï¼š é€šè¿‡protobufåºåˆ—åŒ–ä¹‹åçš„ç»“æ„ä½“A RequestInfo
+		æ•°æ®æ¥æ”¶ï¼š é€šè¿‡protobufåºåˆ—åŒ–ä¹‹åçš„ç»“æ„ä½“B
 */
 bool ClientOP::seckeyAgree()
 {
 	/*
-		1×¼±¸Êı¾İ£¬²¢ĞòÁĞ»¯
-		ĞòÁĞ»¯Àà´¦ÀíÊ²Ã´ÀàĞÍ£¬¾Í×¼±¸Ê²Ã´ÀàĞÍµÄÊı¾İ
-		ĞòÁĞ»¯µÄÀà¶ÔÏóÍ¨¹ı--¡·¹¤³§ÀàµÄ¹¤³§º¯Êı´´½¨µÄ
+		1å‡†å¤‡æ•°æ®ï¼Œå¹¶åºåˆ—åŒ–
+		åºåˆ—åŒ–ç±»å¤„ç†ä»€ä¹ˆç±»å‹ï¼Œå°±å‡†å¤‡ä»€ä¹ˆç±»å‹çš„æ•°æ®
+		åºåˆ—åŒ–çš„ç±»å¯¹è±¡é€šè¿‡--ã€‹å·¥å‚ç±»çš„å·¥å‚å‡½æ•°åˆ›å»ºçš„
 	*/
-	//1´´½¨¹¤³§¶ÔÏó
+	//1åˆ›å»ºå·¥å‚å¯¹è±¡
 	RequestInfo reqInfo;
 	reqInfo.clientID = m_info.clientID;
 	reqInfo.serverID = m_info.serverID;
 	reqInfo.cmd = 1;
 
-	//2Éú³ÉrsaÃÜÔ¿¶Ô
+	//2ç”Ÿæˆrsaå¯†é’¥å¯¹
 	RSACrypto crypto;
-	crypto.generateKeyFile(1024);//128byte
-	//»ñÈ¡Ç©ÃûÊı¾İ--¡·¶Ôrsa¹«Ô¿Ç©Ãû
-	//3½«´ÅÅÌÎÄ¼şÖĞµÄ¹«Ô¿¶Á³ö
+	crypto.generateKeyFile(1024);//128byte å…¶ä»–å‚æ•°é»˜è®¤ public.pem private.pem
+	//è·å–ç­¾åæ•°æ®--ã€‹å¯¹rsaå…¬é’¥ç­¾å
+	//3å°†ç£ç›˜æ–‡ä»¶ä¸­çš„å…¬é’¥è¯»å‡º
 	ifstream ifs("public.pem");
-	//Í¨¹ıÎÄ¼şÁ÷--¡·×Ö·û´®Á÷
+	//é€šè¿‡æ–‡ä»¶æµ--ã€‹å­—ç¬¦ä¸²æµ
 	stringstream strBuf;
 	strBuf << ifs.rdbuf();
-	//´´½¨¹şÏ£¶ÔÏó
+	//åˆ›å»ºå“ˆå¸Œå¯¹è±¡
 	Hash hash(T_SHA1);
 	hash.addData(strBuf.str());
-	string sh1 = hash.result();
-	reqInfo.sign = crypto.rsaSign(sh1);
-	cout << "Ç©Ãû³É¹¦" << "¹«Ô¿ĞÅÏ¢" << endl;
-	//»ñÈ¡¸ø·şÎñÆ÷·¢ËÍµÄÊı¾İ rsa¹«Ô¿
+	string sh1 = hash.result();			//å…¬é’¥ä¿¡æ¯strBufåŠ å¯†
+	reqInfo.sign = crypto.rsaSign(sh1);//å°†å¾—åˆ°çš„å…¬é’¥åŠ å¯†ä¿¡æ¯sh1è¿›è¡Œç­¾åsign
+	cout << "ç­¾åæˆåŠŸ" << "å…¬é’¥ä¿¡æ¯" << endl;
+	//è·å–ç»™æœåŠ¡å™¨å‘é€çš„æ•°æ® rsaå…¬é’¥
 	reqInfo.data = strBuf.str();
-	cout << reqInfo.data << endl;
+	cout << reqInfo.data << endl;//æ‰“å°å…¬é’¥ä¿¡æ¯
+
 	CodecFactory* factory = new RequestFactory(&reqInfo);
 	Codec* codec = factory->createCodec();
-	string encodeMsg = codec->encodeMsg();
-	cout << "Êı¾İ±àÂëÍê³É¡£¡£¡£¡£" << endl;
+	string encodeMsg = codec->encodeMsg();//å°†å¾—åˆ°çš„å…¬é’¥ä¿¡æ¯reqInfoè¿›è¡Œç¼–ç encodeMsg
+	cout << "æ•°æ®ç¼–ç å®Œæˆã€‚ã€‚ã€‚ã€‚" << endl;
 	delete factory;
 	delete codec;
 
-	//½«½âÂëÖ®ºóµÄÊı¾İ·¢ËÍ
-	//Á¬½Ó·şÎñÆ÷
+	//å°†ç¼–ç ä¹‹åçš„æ•°æ®å‘é€
+	//è¿æ¥æœåŠ¡å™¨
 	TcpSocket* socket = new TcpSocket();
-	//Á¬½Ó
+	//è¿æ¥
 	socket->connectToHost(m_info.serverIP, m_info.port);
-	//·¢ËÍÊı¾İ
+	//å‘é€æ•°æ®
 	socket->sendMsg(encodeMsg);
-	//µÈ´ı½ÓÊÕÊı¾İ
+	//ç­‰å¾…æ¥æ”¶æ•°æ®
 	string recvMsg = socket->recvMsg();
 
-	//3½âÂë·şÎñÆ÷»Ø¸´µÄÊı¾İ
-	//31´´½¨½âÂëÊı¾İ¶ÔÏó
+	//3è§£ç æœåŠ¡å™¨å›å¤çš„æ•°æ®
+	//31åˆ›å»ºè§£ç æ•°æ®å¯¹è±¡
 	factory = new RespondFactory(recvMsg);
 	codec = factory->createCodec();
 	RespondMsg* resMsg = (RespondMsg*)codec->decodeMsg();
 
-	//4ÅĞ¶Ï×´Ìå
+	//4åˆ¤æ–­çŠ¶ä½“
 	bool ret = true;
 	if (!resMsg->status()) {
-		cout << "·şÎñÆ÷´¦ÀíÇëÇóÊ§°Ü¡£¡£¡£" << endl;
+		cout << "æœåŠ¡å™¨å¤„ç†è¯·æ±‚å¤±è´¥ã€‚ã€‚ã€‚" << endl;
 		ret = false;
 	}
 	else {
-		//Í¨¹ıË½Ô¿½«dataÖĞµÄÊı¾İ½âÃÜ³öÀ´
+		//é€šè¿‡ç§é’¥å°†dataä¸­çš„æ•°æ®è§£å¯†å‡ºæ¥
 		string aesKey = crypto.rsaPriKeyDecrypt(resMsg->data());
-		cout << "¶Ô³Æ¼ÓÃÜÃÜÔ¿£º " << aesKey << endl;
-		//6½«aeskey ´æ´¢µ½¹²ÏíÄÚ´æÖĞ
+		cout << "å¯¹ç§°åŠ å¯†å¯†é’¥ï¼š " << aesKey << endl;
+		//6å°†aeskey å­˜å‚¨åˆ°å…±äº«å†…å­˜ä¸­
 	}
-	//7ÊÍ·ÅÄÚ´æ
+	//7é‡Šæ”¾å†…å­˜
 	delete factory;
 	delete codec;
-	//8¹Ø±ÕÌ×½Ó×Ö
+	//8å…³é—­å¥—æ¥å­—
 	socket->disConnect();
 	delete socket;
 

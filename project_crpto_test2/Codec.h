@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <iostream>
 #include <string>
 
@@ -8,9 +8,9 @@ class Codec
 {
 public:
 	Codec();
-	//¼ÓÃÜ
+	//åŠ å¯†
 	virtual string encodeMsg();
-	//½âÃÜ
+	//è§£å¯†
 	virtual void* decodeMsg();
 	virtual ~Codec();
 };

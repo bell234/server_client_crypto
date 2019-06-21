@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include "ServerOP.h"
 using namespace std;
 
@@ -12,7 +12,7 @@ int serverFunc() {
 
 
 int main(int argc, char *argv[]) {
-	//¿Í»§¶Ëº¯Êý
+	//å®¢æˆ·ç«¯å‡½æ•°
 	serverFunc();
 
 	return 0;

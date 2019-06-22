@@ -1,24 +1,24 @@
-#include "RespondFactory.h"
+﻿#include "RespondFactory.h"
 
 
 
-RespondFactory::RespondFactory()
-{
-}
+//RespondFactory::RespondFactory()
+//{
+//}
 
-RespondFactory::RespondFactory(string enc)
+RespondFactory::RespondFactory(string enc) : CodecFactory()
 {
 	m_flag = false;
 	m_encStr = enc;
 }
 
-RespondFactory::RespondFactory(RespondInfo* info)
+RespondFactory::RespondFactory(RespondInfo* info) : CodecFactory()
 {
 	m_flag = true;
 	m_info = info;
 }
 
-Codec* RespondFactory::create()
+Codec* RespondFactory::createCodec()
 {
 	Codec* codec = NULL;
 	if (m_flag) {

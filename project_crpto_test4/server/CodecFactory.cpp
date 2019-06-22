@@ -1,4 +1,4 @@
-#include "CodecFactory.h"
+﻿#include "CodecFactory.h"
 
 
 
@@ -8,7 +8,7 @@ CodecFactory::CodecFactory()
 
 Codec* CodecFactory::createCodec()
 {
-	return nullptr;
+	return NULL;
 }
 
 

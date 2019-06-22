@@ -1,5 +1,4 @@
-﻿
-#include "ServerOP.h"
+﻿#include "ServerOP.h"
 #include "RespondFactory.h"
 #include "RequestFactory.h"
 #include "RsaCrypto.h"
@@ -11,7 +10,6 @@
 #include <string>
 #include <ctime>
 #include <unistd.h>
-
 
 
 ServerOP::ServerOP(string jsonfile)
@@ -49,7 +47,7 @@ void ServerOP::startServer()
 	cout << "接受连接请求" << endl;
 	while (true) {
 		TcpSocket* pSocket = m_server->acceptConnectSelect();
-		if (!pSocket) {
+		if (pSocket == NULL) {
 			cout << "accept 错误：继续监听。。。" << endl;
 			continue;
 		}
@@ -79,16 +77,18 @@ void* working(void* arg)
 	//接收数据-->编码之后
 	cout << "接受数据" << endl;
 	string recvMsg = pSocket->recvMsg();
+	cout << recvMsg << endl;
 
 	//对接收的数据进行解码
 	cout << "接受数据解码" << endl;
 	CodecFactory* factory = new RequestFactory(recvMsg);
 	Codec* codec = factory->createCodec();
-	RequestMsg* reqMsg = (RequestMsg*)codec->decodeMsg();
+	RequestMsg* reqMsg = (RequestMsg*)codec->decodeMsg();//通过网络接口传来结构
 
 	//根据cmd判断客户端请求
 	string str;
 	cout << "客户请求为" << reqMsg->cmdtype() << endl;
+	cout << "客户端的reqMsg " << reqMsg->data() << endl;
 	switch (reqMsg->cmdtype())
 	{
 	case 1:
@@ -119,14 +119,14 @@ void* working(void* arg)
 	delete codec;
 	delete pSocket;
 
-	return nullptr;
+	return NULL;
 }
 //密钥协商
 string ServerOP::seckeyArgee(RequestMsg* msg)
 {
 	//1将得到的公钥写入服务器磁盘
 	//写文件，文件名：客户端ID
-	cout << "接收的公钥文件内容为：" <<  msg->data() << endl;
+	cout << "接收的公钥文件内容为：" <<  msg->data() << endl;//base64
 	//根据客户端id组合pem成 想要生成的文件
 	string fileName = msg->clientid() + ".pem";
 	//将文件流刷入磁盘中
@@ -136,6 +136,7 @@ string ServerOP::seckeyArgee(RequestMsg* msg)
 	ofs.close();
 
 	cout << "磁盘上生成了公钥文件。。。" << endl;
+	cout << "fileName" << fileName << endl;
 	RSACrypto rsa(fileName, false);//false为公钥
 	//2校验签名
 	//保证rsa对象中公钥是可用的
@@ -176,7 +177,7 @@ string ServerOP::seckeyArgee(RequestMsg* msg)
 //获取随机字符串
 string ServerOP::getRandStr(KeyLen num)
 {	//以当前时间为种子
-	srand((unsigned int)time(NULL));
+	srand(time(NULL));//unsigned int
 	string retStr = string();
 	char* buf = "~^@#$&*()_+=-{}[];':";
 	for (int i = 0; i < num; ++i) {
@@ -195,7 +196,7 @@ string ServerOP::getRandStr(KeyLen num)
 			break;
 		}
 	}
-	return string();
+	return retStr;
 }
 
 //密钥验证

@@ -1,4 +1,4 @@
-#include "Codec.h"
+﻿#include "Codec.h"
 
 
 
@@ -14,7 +14,7 @@ string Codec::encodeMsg()
 
 void* Codec::decodeMsg()
 {
-	return nullptr;
+	return NULL;
 }
 
 Codec::~Codec()

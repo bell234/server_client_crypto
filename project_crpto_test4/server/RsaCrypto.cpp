@@ -1,11 +1,11 @@
-#include "RsaCrypto.h"
+ï»¿#include "RsaCrypto.h"
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/buffer.h>
 #include <string.h>
 #include <iostream>
 
-//	RSA* m_publicKey;//¹«Ô¿
+//	RSA* m_publicKey;//å…¬é’¥
 //	RSA* m_privateKey;
 
 //extern "C" {
@@ -14,11 +14,11 @@
 
 
 RSACrypto::RSACrypto() {
-	//ÉêÇëÒ»¿éÄÚ´æ
+	//ç”³è¯·ä¸€å—å†…å­˜
 	this->m_privateKey = RSA_new();
 	this->m_publicKey = RSA_new();
 }
-//¸ù¾İ²ğÈë²ÎÊıÈ·¶¨³õÊ¼»¯¹«Ô¿»¹ÊÇË½Ô¿
+//æ ¹æ®æ‹†å…¥å‚æ•°ç¡®å®šåˆå§‹åŒ–å…¬é’¥è¿˜æ˜¯ç§é’¥
 RSACrypto::RSACrypto(string fileName, bool isPrivate) {
 	this->m_privateKey = RSA_new();
 	this->m_publicKey = RSA_new();
@@ -29,77 +29,78 @@ RSACrypto::RSACrypto(string fileName, bool isPrivate) {
 		initPublicKey(fileName);
 	}
 }
-//Îö¹¹º¯Êı ÊÍ·ÅÉêÇëµÄÃÜÔ¿µÄÄÚ´æ 
+//ææ„å‡½æ•° é‡Šæ”¾ç”³è¯·çš„å¯†é’¥çš„å†…å­˜ 
 RSACrypto::~RSACrypto() {
 	RSA_free(this->m_privateKey);
 	RSA_free(this->m_publicKey);
 }
-//½«¹«Ô¿/Ë½Ô¿×Ö·û´®½âÎöµ½RSA¶ÔÏóÖĞ
+//å°†å…¬é’¥/ç§é’¥å­—ç¬¦ä¸²è§£æåˆ°RSAå¯¹è±¡ä¸­
 void RSACrypto::parseKeyString(string keystr, bool pubkey)
-{	//×Ö·û´®Êı¾İ-->BIO¶ÔÏóÖĞ
+{	//å­—ç¬¦ä¸²æ•°æ®-->BIOå¯¹è±¡ä¸­
 	BIO* bio = BIO_new_mem_buf(keystr.data(), keystr.size());
-	//¹«Ô¿×Ö·û´®
+	//å…¬é’¥å­—ç¬¦ä¸²
 	if (pubkey) {
 		PEM_read_bio_RSAPublicKey(bio, &m_publicKey, NULL, NULL);
 	}
 	else {
-		//Ë½Ô¿×Ö·û´®
+		//ç§é’¥å­—ç¬¦ä¸²
 		PEM_read_bio_RSAPrivateKey(bio, &m_privateKey, NULL, NULL);
 	}
 	BIO_free(bio);
 }
 
-//Éú³ÉRSAÃÜÔ¿¶Ô
+//ç”ŸæˆRSAå¯†é’¥å¯¹
 void RSACrypto::generateKeyFile(int bits, string pub, string pri) {
-	//1ÉêÇëÄÚ´æ
+	//1ç”³è¯·å†…å­˜
 	RSA* rsa = RSA_new();
 
 	BIGNUM* bignum = BN_new();
-	//³õÊ¼»¯BIGNUM¶ÔÏó
-	BN_set_word(bignum, 4567887);
+	//åˆå§‹åŒ–BIGNUMå¯¹è±¡
+	BN_set_word(bignum, 456787);
 
-	//Éú³ÉRSAÃÜÔ¿¶Ô
+	//ç”ŸæˆRSAå¯†é’¥å¯¹
 	RSA_generate_key_ex(rsa, bits, bignum, NULL);
 
-	//´´½¨bioÎÄ¼ş¶ÔÏó
+	//åˆ›å»ºbioæ–‡ä»¶å¯¹è±¡
 	BIO* publicBIO = BIO_new_file(pub.data(), "w");
-	//¹«Ô¿ÒÔpem¸ñÊ½Ğ´ÈëÎÄ¼şÖĞ
+	//å…¬é’¥ä»¥pemæ ¼å¼å†™å…¥æ–‡ä»¶ä¸­
 	PEM_write_bio_RSAPublicKey(publicBIO, rsa);
-	//»º´æÖĞÊı¾İË¢ĞÂµ½»º³åÇø
+	//ç¼“å­˜ä¸­æ•°æ®åˆ·æ–°åˆ°ç¼“å†²åŒº
 	BIO_flush(publicBIO);
 	BIO_free(publicBIO);
 
-	//´´½¨bio¶ÔÏó
+	//åˆ›å»ºbioå¯¹è±¡
 	BIO* privateBi0 = BIO_new_file(pri.data(), "w");
-	//Ë½Ô¿ÒÔpem¸ñÊ½Ğ´ÈëÎÄ¼şÖĞ
+	//ç§é’¥ä»¥pemæ ¼å¼å†™å…¥æ–‡ä»¶ä¸­
 	PEM_write_bio_RSAPrivateKey(privateBi0, rsa, NULL, NULL, 0, NULL, NULL);
 	BIO_flush(privateBi0);
 	BIO_free(privateBi0);
 
-	//µÃµ½¹«Ô¿ºÍË½Ô¿
-	//½«²ÎÊırsaÖĞµÄ¹«Ô¿/Ë½Ô¿ÌáÈ¡³öÀ´
+	//å¾—åˆ°å…¬é’¥å’Œç§é’¥
+	//å°†å‚æ•°rsaä¸­çš„å…¬é’¥/ç§é’¥æå–å‡ºæ¥
 	m_privateKey = RSAPrivateKey_dup(rsa);
+
 	m_publicKey = RSAPublicKey_dup(rsa);
-	//ÊÍ·Å×ÊÔ´
+	//é‡Šæ”¾èµ„æº
 	BN_free(bignum);
 	RSA_free(rsa);
 }
-//¹«Ô¿¼ÓÃÜ
+//å…¬é’¥åŠ å¯†
 string RSACrypto::rsaPubKeyEncrypt(string data) {
-	cout << "¼ÓÃÜÊı¾İ³¤¶È£º" << data.size() << endl;
-	//¼ÆËã¹«Ô¿³¤¶È
+	cout << "åŠ å¯†æ•°æ®é•¿åº¦ï¼š" << data.size() << endl;
+	//è®¡ç®—å…¬é’¥é•¿åº¦
 	int keyLen = RSA_size(m_publicKey);
-	cout << "pbulic key length is: ¹«Ô¿³¤¶ÈÎª£º" << keyLen << endl;
-	//¸ù¾İ¹«Ô¿³¤¶ÈÉêÇëÄÚ´æ
+	cout << "pbulic key length is: å…¬é’¥é•¿åº¦ä¸ºï¼š" << keyLen << endl;
+	//æ ¹æ®å…¬é’¥é•¿åº¦ç”³è¯·å†…å­˜
 	char* encode = new char[keyLen + 1];
 
-	//Ê¹ÓÃ¹«Ô¿¼ÓÃÜ
-	int ret = RSA_public_decrypt(data.size(), (const unsigned char*)data.data(),
+	//ä½¿ç”¨å…¬é’¥åŠ å¯†
+	int ret = RSA_public_encrypt(data.size(), (const unsigned char*)data.data(),
 		(unsigned char*)encode, m_publicKey, RSA_PKCS1_PADDING);
 
 	string retStr = string();
 	if (ret >= 0) {
-		//¼ÓÃÜ³É¹¦
+		//åŠ å¯†æˆåŠŸ
 		cout << "ret: " << ret << ", keyLen: " << keyLen << endl;
 		retStr = toBase64(encode, ret);
 	}
@@ -109,42 +110,44 @@ string RSACrypto::rsaPubKeyEncrypt(string data) {
 	delete[] encode;
 	return retStr;
 }
-//Ë½Ô¿½âÃÜ
+//ç§é’¥è§£å¯†
 string RSACrypto::rsaPriKeyDecrypt(string encData) {
 	char* text = fromBase64(encData);
-	//¼ÆËãË½Ô¿³¤¶È
-	//cout<<"½âÃÜÊı¾İ³¤¶È£º "<<text.size()<<endl;
+	//è®¡ç®—ç§é’¥é•¿åº¦
+	//cout<<"è§£å¯†æ•°æ®é•¿åº¦ï¼š "<<text.size()<<endl;
 	int keyLen = RSA_size(m_privateKey);
-	//¸ù¾İ³¤¶ÈÉêÇëÄÚ´æ
+	//æ ¹æ®é•¿åº¦ç”³è¯·å†…å­˜
 	char* decode = new char[keyLen + 1];
 
-	//Ê¹ÓÃË½Ô¿½âÃÜ
+	//ä½¿ç”¨ç§é’¥è§£å¯†
 	int ret = RSA_private_decrypt(keyLen, (const unsigned char*)text,
 		(unsigned char*)decode, m_privateKey, RSA_PKCS1_PADDING);
 
 	string retStr = string();
 	if (ret >= 0) {
-		//½âÃÜ³É¹¦
+		//è§£å¯†æˆåŠŸ
 		retStr = string(decode, ret);
 	}
 	else {
-		cout << "½âÃÜÊ§°Ü" << endl;
+		cout << "è§£å¯†å¤±è´¥" << endl;
 		ERR_print_errors_fp(stdout);
 	}
 	delete[] decode;
 	delete[] text;
 	return retStr;
 }
-//Ê¹ÓÃRSAÇ©Ãû
+//ä½¿ç”¨RSAç­¾å
 string RSACrypto::rsaSign(string data, SignLevel level) {
 
 	unsigned int len = 0;
-	char* signBuf = new char[RSA_size(m_privateKey) + 1];
-	memset(signBuf, 0, RSA_size(m_privateKey));
-	//Ç©Ãû									//data.length();?
+	/*char* signBuf = new char[RSA_size(m_privateKey) + 1];
+	memset(signBuf, 0, RSA_size(m_privateKey)+1);*/
+	char* signBuf = new char[1024];
+	memset(signBuf, 0, 1024);
+	//ç­¾å									//data.length();?
 	int ret = RSA_sign(level, (const unsigned char*)data.data(), data.size(),
 		(unsigned char*)signBuf, &len, m_privateKey);
-	cout << "sign length is Ç©ÃûµÄ³¤¶È£º" << len << endl;
+	cout << "sign length is ç­¾åçš„é•¿åº¦ï¼š" << len << endl;
 	if (ret == -1) {
 		ERR_print_errors_fp(stdout);
 	}
@@ -154,18 +157,25 @@ string RSACrypto::rsaSign(string data, SignLevel level) {
 	return retStr;
 }
 
-//Ê¹ÓÃRSAÑéÖ¤Ç©Ãû
+//ä½¿ç”¨RSAéªŒè¯ç­¾å
 bool RSACrypto::rsaVertifySign(string data, string signData, SignLevel level ) {
-	//ÑéÖ¤Ç©Ãû
+	//éªŒè¯ç­¾å
+	cout << "éªŒè¯ç­¾åå‡½æ•°RSACrypto::rsaVertifySignè¿è¡Œ" << endl;
+	cout << "ä¼ å…¥å‚æ•°dataä¸º" << data << " sigDataä¸º" << signData << " level ä¸º" << level << endl;
 	int keyLen = RSA_size(m_publicKey);
+	cout << " keyLené•¿åº¦ä¸º" << endl;
 	char* sign = fromBase64(signData);
-	int ret = RSA_verify(level, (unsigned char*)data.data(), data.size(),
-		(const unsigned char*)signData.data(), signData.size(), m_publicKey);
+	cout << " sign ä¸º" << sign << endl;
+	int ret = RSA_verify(level, (const unsigned char*)data.data(), data.size(),
+		(const unsigned char*)sign, keyLen, m_publicKey);
+	cout << "éªŒè¯ç­¾åè¿”å›å€¼ret = " << ret << endl;//0
 	delete[] sign;
 	if (ret == -1) {
+		cout << "1" << endl;
 		ERR_print_errors_fp(stdout);
 	}
 	if (ret != 1) {
+		cout << "2" << endl;
 		return false;
 	}
 	return true;
@@ -173,38 +183,38 @@ bool RSACrypto::rsaVertifySign(string data, string signData, SignLevel level ) {
 string RSACrypto::toBase64(const char* str, int len)
 {
 	BIO* mem = BIO_new(BIO_s_mem());
-	BIO* base64 = BIO_new(BIO_f_base64());
-	//memÌí¼Óµ½base64ÖĞ
-	base64 = BIO_push(base64, mem);
-	//Ğ´Êı¾İ
-	BIO_write(base64, str, len);
-	BIO_flush(base64);
-	//µÃµ½ÄÚ´æ¶ÔÏóÖ¸Õë
+	BIO* bs64 = BIO_new(BIO_f_base64());
+	//memæ·»åŠ åˆ°base64ä¸­
+	bs64 = BIO_push(bs64, mem);
+	//å†™æ•°æ®
+	BIO_write(bs64, str, len);
+	BIO_flush(bs64);
+	//å¾—åˆ°å†…å­˜å¯¹è±¡æŒ‡é’ˆ
 	BUF_MEM* memPtr;
-	BIO_get_mem_ptr(base64, &memPtr);
+	BIO_get_mem_ptr(bs64, &memPtr);
 	string retStr = string(memPtr->data, memPtr->length - 1);
-	BIO_free_all(base64);
+	BIO_free_all(bs64);
 	return retStr;
 }
 
 char* RSACrypto::fromBase64(string str)
 {
 	int length = str.size();
-	BIO* base64 = BIO_new(BIO_f_base64());
+	BIO* bs64 = BIO_new(BIO_f_base64());
 	BIO* mem = BIO_new_mem_buf(str.data(), length);
-	BIO_push(base64, mem);
+	BIO_push(bs64, mem);
 	char* buffer = new char[length];
 	memset(buffer, 0, length);
-	BIO_read(base64, buffer, length);
-	BIO_free_all(base64);
+	BIO_read(bs64, buffer, length);
+	BIO_free_all(bs64);
 	return buffer;
 }
 //private:
-	//»ñÈ¡¹«Ô¿ÊÇ·ñ³É¹¦
+	//è·å–å…¬é’¥æ˜¯å¦æˆåŠŸ
 bool RSACrypto::initPublicKey(string pubfile) {
-	//´´½¨bio¶ÔÏó			//²Ù×÷µÄ´ÅÅÌÎÄ¼ş  ²Ù×÷ÎÄ¼şµÄ·½Ê½
+	//åˆ›å»ºbioå¯¹è±¡			//æ“ä½œçš„ç£ç›˜æ–‡ä»¶  æ“ä½œæ–‡ä»¶çš„æ–¹å¼
 	BIO* pubBio = BIO_new_file(pubfile.data(), "r");
-	if (!PEM_read_bio_RSAPublicKey(pubBio, &m_publicKey, NULL, NULL)) {
+	if ((PEM_read_bio_RSAPublicKey(pubBio, &m_publicKey, NULL, NULL)) == NULL) {
 		ERR_print_errors_fp(stdout);
 		return false;
 	}
@@ -219,11 +229,11 @@ bool RSACrypto::initPublicKey(string pubfile) {
 	return true;*/
 }
 
-	//»ñÈ¡Ë½Ô¿ÊÇ·ñ³É¹¦
+	//è·å–ç§é’¥æ˜¯å¦æˆåŠŸ
 bool RSACrypto::initPrivateKey(string prifile) {
 	BIO* priBio = BIO_new_file(prifile.data(), "r");
-	//½«bioÖĞpemÊı¾İ¶Á³ö
-	if (!PEM_read_bio_RSAPrivateKey(priBio, &m_privateKey, NULL, NULL)) {
+	//å°†bioä¸­pemæ•°æ®è¯»å‡º
+	if ((PEM_read_bio_RSAPrivateKey(priBio, &m_privateKey, NULL, NULL))== NULL) {
 		ERR_print_errors_fp(stdout);
 		return false;
 	}

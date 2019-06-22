@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Codec.h"
 #include <iostream>
 #include "msg.pb.h"
@@ -19,9 +19,9 @@ class RespondCodec :
 {
 public:
 	RespondCodec();
-	RespondCodec(std::string enc);
+	RespondCodec(string enc);
 	RespondCodec(RespondInfo* info);
-	void initMessage(std::string enc);
+	void initMessage(string enc);
 	void initMessage(RespondInfo* info);
 	string encodeMsg();
 	void* decodeMsg();

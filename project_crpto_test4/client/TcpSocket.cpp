@@ -37,7 +37,7 @@ int TcpSocket::connectToHost(string ip, unsigned short port, int timeOut) {
 		return ret;
 	}
 	////端口复用
-	//int op = 0;
+	//int op = 1;
 	//if (-1 == (ret = setsockopt(this->m_socket, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int)))) {
 	//	ret = errno;
 	//	printf("setsockopt(this->m_socket, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int))error : %d\n", ret);
@@ -65,10 +65,10 @@ int TcpSocket::connectToHost(string ip, unsigned short port, int timeOut) {
 //发送数据
 int TcpSocket::sendMsg(string sendData, int timeOut) {
 
-	cout << "发送数据为" << sendData << " 时间为" << timeOut << endl;
+	//cout << "发送数据为 " << sendData << " 时间为" << timeOut << endl;
 	//返回0==>没超时   -1==>超时
 	int ret = writeTimeOut(timeOut);
-	cout << "writeTimeout返回值为" << ret << endl;
+	cout << "writeTimeout返回值为" << ret << endl;//0
 	if (ret == 0) {
 		int writed = 0;
 		int writeDataLen = sendData.size() + 4;
@@ -78,16 +78,19 @@ int TcpSocket::sendMsg(string sendData, int timeOut) {
 			printf("func sendMsg malloc(writeDataLen) netData == NULL error");
 			return ret;
 		}
+		//memset(netData, 0, sizeof(netData));
 		//转换网络字节序
 		cout << "要发送的字节数" << sendData.size() << endl;
 		int netLen = htonl(sendData.size());
+		cout << "netLen htonl 长度为" << netLen << endl;
 		//strncpy((char*)netData, (const char*)&netLen, 4);//注意
 		memcpy(netData, &netLen, 4);
+		cout << "首先拷贝长度" << netData <<  endl;
 		memcpy(netData + 4, sendData.data(), sendData.size());
-
+		cout << "拷贝数据" << endl;
 		//没问题发送实际字节数 ==dataLen
 		writed = writen(netData, writeDataLen);
-		cout << "写入字节为writed" << writed << endl;
+		cout << "写入字节为writed " << writed << endl;
 		if (writed < writeDataLen) {
 			if (netData != NULL) {
 				free(netData);
@@ -114,7 +117,9 @@ int TcpSocket::sendMsg(string sendData, int timeOut) {
 //接收数据
 string TcpSocket::recvMsg(int timeOut) {
 	//返回0 没有超时就收到数据，  -1超时或有异常
+	cout << "进入recvMsg" << endl;
 	int ret = readTimeOut(timeOut);
+	cout << "TcpSocket::recvMsg ret" << ret << endl;//1
 	if (ret != 0) {
 		if (ret == -1 || errno == ETIMEDOUT) {
 			printf("func TcpSocket::recvMsg readTimeOut ETIMEDOUT error\n");
@@ -127,7 +132,9 @@ string TcpSocket::recvMsg(int timeOut) {
 	}
 
 	int recvDataLen = 0;
+	cout << "开始readn" << endl;
 	ret = readn(&recvDataLen, 4);//读包头四个字节
+	cout << "readn返回值ret = " << ret << endl;
 	if (ret == -1) {
 		printf("func readn() err:%d\n", ret);
 		return string();
@@ -193,6 +200,7 @@ int TcpSocket::setBlock(int fd) {
 //读超时检测	不含读操作
 int TcpSocket::readTimeOut(unsigned int wait_seconds) {
 	int ret = 0;
+	cout << "进入TcpSocket::readTimeOut" << endl;
 	if (wait_seconds > 0) {
 		fd_set readTimeOutSet;
 		FD_ZERO(&readTimeOutSet);
@@ -202,10 +210,10 @@ int TcpSocket::readTimeOut(unsigned int wait_seconds) {
 		timeout.tv_sec = wait_seconds;
 		timeout.tv_usec = 0;
 		do {
-			ret = select(this->m_socket + 1, NULL, &readTimeOutSet, NULL, &timeout);
+			ret = select(this->m_socket + 1, &readTimeOutSet, NULL, NULL, &timeout);
 		} while (ret < 0 && errno == EINTR);
 		
-		if (ret == -1) {
+		if (ret == 1) {
 			return 0;
 		}
 		else if (ret == 0) {
@@ -213,6 +221,7 @@ int TcpSocket::readTimeOut(unsigned int wait_seconds) {
 			errno = ETIMEDOUT;
 		}
 	}
+	cout << "TcpSocket::readTimeOut ret " << ret << endl;
 	return ret;
 }
 //写超时检测函数	不含写操作
@@ -254,7 +263,7 @@ int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_second
 	if (wait_seconds > 0) {
 		setNonBlock(this->m_socket);
 	}
-	sockLen = sizeof(sockaddr_in);
+	sockLen = sizeof(struct sockaddr_in);
 	ret = connect(this->m_socket, (struct sockaddr*)addr, sockLen);
 	//设置为非阻塞连接返回-1并且errno=EINPROGRESS表示连接进行中
 	if (ret < 0 && errno == EINPROGRESS) {
@@ -305,9 +314,12 @@ int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_second
 }
 //每次从缓冲区读取n个字符
 int TcpSocket::readn(void* buf, int count) {
+	cout << "TcpSocket::readn count = " << count << endl;
 	size_t dataLeft = count;
 	size_t dataRead;
 	char* tmpBuf = (char*)buf;
+	cout << "this->m_socket = " << this->m_socket << endl;
+	cout << "buf = " << tmpBuf << endl;
 	while (dataLeft > 0) {
 		if ((dataRead = read(this->m_socket, tmpBuf, dataLeft)) < 0) {
 			//当返回值小于指定的字节数时
@@ -326,6 +338,7 @@ int TcpSocket::readn(void* buf, int count) {
 		tmpBuf += dataRead;
 		dataLeft -= dataRead;
 	}
+	cout << "TcpSocket::readn 返回" << count << endl;
 	return count;
 }
 //每次往缓冲区中写入n个字符
@@ -334,18 +347,27 @@ int TcpSocket::writen(const void* buf, int count) {
 	size_t dataLeft = count;
 	size_t dataWrite;
 	char* tmpBuf = (char*)buf;
+	cout << "TcpSocket::writen 开始写操作" << endl;
+	cout << "count = " << dataLeft << endl;
+	cout << "this->m_socket" << this->m_socket << endl;
 	while (dataLeft > 0) {
-		if ((dataLeft = write(this->m_socket, tmpBuf, dataLeft)) < 0) {
+		cout << "写" << endl;
+		if ((dataWrite = write(this->m_socket, tmpBuf, dataLeft)) < 0) {
+			cout << "写入" << endl;
 			if (errno == EINTR) {
+				cout << "信号被打断" << endl;
 				continue;
 			}
 			return -1;
 		}
-		else if (dataLeft == 0) {
-			return count - dataLeft;
+		else if (dataWrite == 0) {
+			//return count - dataLeft;
+			cout << "datawrite = 0" << endl;
+			continue;
 		}
 		tmpBuf += dataWrite;
-		dataLeft = dataWrite;
+		dataLeft -= dataWrite;
 	}
+	cout << "TcpSocket::writen return count" << count << endl;
 	return count;
 }

@@ -1,17 +1,17 @@
-#include "SecKeyShm.h"
+ï»¿#include "SecKeyShm.h"
 
-SecKeyShm::SecKeyShm(int key) :BaseShm(key) {
-
-}
+//SecKeyShm::SecKeyShm(int key) :BaseShm(key) {
+//
+//}
 SecKeyShm::SecKeyShm(int key, int maxNode):
 	BaseShm(key, maxNode*sizeof(NodeSHMInfo)),
 		m_maxNode(maxNode){
 
 }
-SecKeyShm::SecKeyShm(string pathName):
-	BaseShm(pathName) {
-
-}
+//SecKeyShm::SecKeyShm(string pathName):
+//	BaseShm(pathName) {
+//
+//}
 SecKeyShm::SecKeyShm(string pathName, int maxNode):
 		BaseShm(pathName, maxNode*sizeof(NodeSHMInfo)),
 		m_maxNode(maxNode){
@@ -30,7 +30,7 @@ void SecKeyShm::shmInit()
 
 int SecKeyShm::shmWrite(NodeSHMInfo* pNodeInfo) {
 	int ret = -1;
-	//¹ØÁªµ±Ç°½ø³Ì ¹²ÏíÄÚ´æ
+	//å…³è”å½“å‰è¿›ç¨‹ å…±äº«å†…å­˜
 	NodeSHMInfo* pAddr = static_cast<NodeSHMInfo*>(mapShm());
 	if (pAddr == NULL) {
 		return ret;
@@ -39,59 +39,59 @@ int SecKeyShm::shmWrite(NodeSHMInfo* pNodeInfo) {
 	NodeSHMInfo* pNode = NULL;
 
 	for (int i = 0; i < m_maxNode; ++i) {
-		//pNodeÒÀ´ÎÖ¸ÏòÃ¿¸ö½ÚµãÊ×µØÖ·
+		//pNodeä¾æ¬¡æŒ‡å‘æ¯ä¸ªèŠ‚ç‚¹é¦–åœ°å€
 		pNode = pAddr + i;
 		cout << i << endl;
 		cout << pNode->clientID << ", " << pNodeInfo->clientID << endl;
 		cout << pNode->serverID << ", " << pNodeInfo->serverID << endl;
-		//ÅĞ¶Ï´«ÈëÍøµãµÄÃÜÔ¿ÊÇ·ñÒÑ¾­´æÔÚ 
+		//åˆ¤æ–­ä¼ å…¥ç½‘ç‚¹çš„å¯†é’¥æ˜¯å¦å·²ç»å­˜åœ¨ 
 		if ((strcmp(pNode->clientID, pNodeInfo->clientID) == 0) &&
 			(strcmp(pNode->serverID, pNodeInfo->serverID) == 0)) {
-			//Ê¹ÓÃĞÂÃÜÔ¿¸²¸Ç¾ÉµÄÃÜÔ¿Öµ
-			memcpy(pNode, pNodeInfo, sizeof(pNodeInfo));
+			//ä½¿ç”¨æ–°å¯†é’¥è¦†ç›–æ—§çš„å¯†é’¥å€¼
+			memcpy(pNode, pNodeInfo, sizeof(NodeSHMInfo));
 			unmapShm();
-			cout << "Ğ´Êı¾İ³É¹¦£ºÔ­Êı¾İ±»¸²¸Ç" << endl;
+			cout << "å†™æ•°æ®æˆåŠŸï¼šåŸæ•°æ®è¢«è¦†ç›–" << endl;
 			return 0;
 		}
 	}
-	//Èç¹ûÃ»ÓĞÕÒµ½¶ÔÓ¦ĞÅÏ¢£¬ÕÒµ½Ò»¸ö¿Õ½Úµã½«ÃÜÔ¿ĞÅÏ¢Ğ´Èë
+	//å¦‚æœæ²¡æœ‰æ‰¾åˆ°å¯¹åº”ä¿¡æ¯ï¼Œæ‰¾åˆ°ä¸€ä¸ªç©ºèŠ‚ç‚¹å°†å¯†é’¥ä¿¡æ¯å†™å…¥
 	int i = 0;
-	NodeSHMInfo tmpNodeInfo;//¿Õ½Úµã Ä¬ÈÏ¹¹Ôìº¯ÊıÒÑ¾­³õÊ¼»¯ÁË
+	NodeSHMInfo tmpNodeInfo;//ç©ºèŠ‚ç‚¹ é»˜è®¤æ„é€ å‡½æ•°å·²ç»åˆå§‹åŒ–äº†
 	for ( i = 0; i < m_maxNode; ++i) {
 		pNode = pAddr + i;
-		//Óë¿Õ½Úµã¶Ô±È
-		if (memcmp(&tmpNodeInfo, pNode, sizeof(pNode))==0) {
+		//ä¸ç©ºèŠ‚ç‚¹å¯¹æ¯”
+		if (memcmp(&tmpNodeInfo, pNode, sizeof(NodeSHMInfo))==0) {
 			ret = 0;
 			memcpy(pNode, pNodeInfo, sizeof(NodeSHMInfo));
-			cout << "Ğ´Êı¾İ³É¹¦£ºÔÚĞÂµÄ½ÚµãÉÏÌí¼ÓÁËÊı¾İ" << endl;
+			cout << "å†™æ•°æ®æˆåŠŸï¼šåœ¨æ–°çš„èŠ‚ç‚¹ä¸Šæ·»åŠ äº†æ•°æ®" << endl;
 			break;
 		}		
 	}
 	if (i == m_maxNode) {
-		cout << "Ğ´Êı¾İÊ§°Ü£º Ã»ÓĞĞÂµÄ½Úµã¿ÉÓÃÁË" << endl;
+		cout << "å†™æ•°æ®å¤±è´¥ï¼š æ²¡æœ‰æ–°çš„èŠ‚ç‚¹å¯ç”¨äº†" << endl;
 		ret = -1;
 	}
-	//¹²ÏíÄÚ´æÓëµ±Ç°Ïß³Ì·ÖÀë
+	//å…±äº«å†…å­˜ä¸å½“å‰çº¿ç¨‹åˆ†ç¦»
 	unmapShm();
 	return ret;
 
 }
 NodeSHMInfo SecKeyShm::shmRead(string clientID, string serverID) {
 	int ret = 0;
-	//¹ØÁª¹²ÏíÄÚ´æ
+	//å…³è”å…±äº«å†…å­˜
 	NodeSHMInfo* pAddr = NULL;
-	//¹ØÁª
+	//å…³è”
 	pAddr = static_cast<NodeSHMInfo*>(mapShm());
 	if (pAddr == NULL) {
-		cout << "¹ØÁª¹²ÏíÄÚ´æÊ§°Ü£¡" << endl;
+		cout << "å…³è”å…±äº«å†…å­˜å¤±è´¥ï¼" << endl;
 		return NodeSHMInfo();
 	}
-	cout << "¹ØÁª¹²ÏíÄÚ´æ³É¹¦" << endl;
-	//±éÀúÍøµãĞÅÏ¢
+	cout << "å…³è”å…±äº«å†…å­˜æˆåŠŸ" << endl;
+	//éå†ç½‘ç‚¹ä¿¡æ¯
 	int i = 0;
 	NodeSHMInfo info;
 	NodeSHMInfo* pNode = NULL;
-	//Í¨¹ıclientID  serverID ²éÕÒ½áµã
+	//é€šè¿‡clientID  serverID æŸ¥æ‰¾ç»“ç‚¹
 	cout << "maxNode: " << m_maxNode << endl;
 	for (int i = 0; i < m_maxNode; ++i) {
 		pNode = pAddr + i;
@@ -100,7 +100,7 @@ NodeSHMInfo SecKeyShm::shmRead(string clientID, string serverID) {
 		cout << pNode->serverID << ", " << serverID.data() << endl;
 		if ((strcmp(pNode->clientID, clientID.data()) == 0) &&
 			(strcmp(pNode->serverID, serverID.data()) == 0)) {
-			//ÕÒµ½½ÚµãĞÅÏ¢£¬¿½±´µ½´«³ö²ÎÊı
+			//æ‰¾åˆ°èŠ‚ç‚¹ä¿¡æ¯ï¼Œæ‹·è´åˆ°ä¼ å‡ºå‚æ•°
 			info = *pNode;
 			cout << "*****************************" << endl;
 			cout << info.clientID << ", " << info.serverID << ", "

@@ -1,4 +1,4 @@
-#include "BaseShm.h"
+ï»¿#include "BaseShm.h"
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <string.h>
@@ -18,7 +18,7 @@ BaseShm::BaseShm(int key, int size)
 }
 
 BaseShm::BaseShm(string name)
-{//°ÑÒ»¸öÒÑ´æÔÚµÄÂ·¾¶ÃûºÍÒ»¸öÕûÊı±êÊ¶·û×ª»»³ÉÒ»¸ökey_tÖµ£¬³ÆÎªIPC¼üÖµ
+{//æŠŠä¸€ä¸ªå·²å­˜åœ¨çš„è·¯å¾„åå’Œä¸€ä¸ªæ•´æ•°æ ‡è¯†ç¬¦è½¬æ¢æˆä¸€ä¸ªkey_tå€¼ï¼Œç§°ä¸ºIPCé”®å€¼
 	key_t key = ftok(name.data(), RandX);
 	getShmID(key, 0, 0);
 }
@@ -26,29 +26,29 @@ BaseShm::BaseShm(string name)
 BaseShm::BaseShm(string name, int size)
 {
 	key_t key = ftok(name.data(), RandX);
-	//´´½¨¹²ÏíÄÚ´æ
+	//åˆ›å»ºå…±äº«å†…å­˜
 	getShmID(key, size, IPC_CREAT | 0664);
 }
 
 void* BaseShm::mapShm()
 {
-	//¹ØÁªµ±Ç°½ø³ÌºÍ¹²ÏíÄÚ´æ
+	//å…³è”å½“å‰è¿›ç¨‹å’Œå…±äº«å†…å­˜
 	m_shmAddr = shmat(m_shmID, NULL, 0);
 	if (m_shmAddr == (void*)-1) {
-		cout << "¹ØÁª¹²ÏíÄÚ´æÊ§°Ü!" << endl;
+		cout << "å…³è”å…±äº«å†…å­˜å¤±è´¥!" << endl;
 		return NULL;
 	}
 	return m_shmAddr;
 }
 
 int BaseShm::unmapShm()
-{	//¹²ÏíÄÚ´æÓëµ±Ç°½ø³Ì·ÖÀë
+{	//å…±äº«å†…å­˜ä¸å½“å‰è¿›ç¨‹åˆ†ç¦»
 	int ret = shmdt(m_shmAddr);
 	return ret;
 }
 
 int BaseShm::delShm()
-{	//É¾³ı¹²ÏíÄÚ´æ
+{	//åˆ é™¤å…±äº«å†…å­˜
 	int ret = shmctl(m_shmID, IPC_RMID, NULL);
 	return ret;
 }
@@ -56,23 +56,23 @@ int BaseShm::delShm()
 BaseShm::~BaseShm()
 {
 }
-//¹²ÏíÄÚ´æ´´½¨private
+//å…±äº«å†…å­˜åˆ›å»ºprivate
 int BaseShm::getShmID(key_t key, int shmSize, int flag)
 {
-	cout << "¹²ÏíÄÚ´æ³ß´çÎª£º" << shmSize << endl;
+	cout << "å…±äº«å†…å­˜å°ºå¯¸ä¸ºï¼š" << shmSize << endl;
 	m_shmID = shmget(key, shmSize, flag);
 	if (m_shmID == -1) {
-		cout << "shmgetÊ§°Ü£¡" << endl;
+		cout << "shmgetå¤±è´¥ï¼" << endl;
 	}
-	//¹²ÏíÄÚ´æµØÖ·³õÊ¼»¯
-	if (shmSize > 0) {
-		//µ±Ç°½ø³ÌÓë¹²ÏíÄÚ´æ½¨Á¢¹ØÁª
-		void* addr = shmat(m_shmID, NULL, 0);
-		memset(addr, 0, shmSize);
-		//¹²ÏíÄÚ´æÓëµ±Ç°½ø³Ì·ÖÀë ½ø³Ì¾Í²»ÄÜ²Ù×÷Õâ¿éÄÚ´æÁË
-		//ÊÇ²»ÄÜĞ´  Ö»ÄÜ¶ÁÂğ£¿==>´ğ°¸£º²»ÊÇµÄ£¬ÕâÖ»ÊÇ³õÊ¼»¯£¬Ã¿¸öº¯Êıµ÷ÓÃ¶¼¶À×ÔÓĞ·â×°
-		shmdt(addr);//³É¹¦0  Ê§°Ü-1
-	}
-	cout << "¹²ÏíÄÚ´æ´´½¨³É¹¦..." << endl;
+	////å…±äº«å†…å­˜åœ°å€åˆå§‹åŒ–
+	//if (shmSize > 0) {
+	//	//å½“å‰è¿›ç¨‹ä¸å…±äº«å†…å­˜å»ºç«‹å…³è”
+	//	void* addr = shmat(m_shmID, NULL, 0);
+	//	memset(addr, 0, shmSize);
+	//	//å…±äº«å†…å­˜ä¸å½“å‰è¿›ç¨‹åˆ†ç¦» è¿›ç¨‹å°±ä¸èƒ½æ“ä½œè¿™å—å†…å­˜äº†
+	//	//æ˜¯ä¸èƒ½å†™  åªèƒ½è¯»å—ï¼Ÿ==>ç­”æ¡ˆï¼šä¸æ˜¯çš„ï¼Œè¿™åªæ˜¯åˆå§‹åŒ–ï¼Œæ¯ä¸ªå‡½æ•°è°ƒç”¨éƒ½ç‹¬è‡ªæœ‰å°è£…
+	//	shmdt(addr);//æˆåŠŸ0  å¤±è´¥-1
+	//}
+	//cout << "å…±äº«å†…å­˜åˆ›å»ºæˆåŠŸ..." << endl;
 	return m_shmID;
 }

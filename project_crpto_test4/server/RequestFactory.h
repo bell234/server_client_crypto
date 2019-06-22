@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include "CodecFactory.h"
 #include "Codec.h"
@@ -10,7 +10,7 @@ class RequestFactory :
 	public CodecFactory
 {
 public:
-	RequestFactory();
+	//RequestFactory();
 	RequestFactory(string enc);
 	RequestFactory(RequestInfo* info);
 	Codec* createCodec();

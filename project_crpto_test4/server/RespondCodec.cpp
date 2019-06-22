@@ -1,4 +1,4 @@
-#include "RespondCodec.h"
+﻿#include "RespondCodec.h"
 #include <iostream>
 
 using namespace std;
@@ -9,7 +9,7 @@ RespondCodec::RespondCodec()
 {
 }
 
-RespondCodec::RespondCodec(std::string enc)
+RespondCodec::RespondCodec(string enc)
 {
 	initMessage(enc);
 }
@@ -19,7 +19,7 @@ RespondCodec::RespondCodec(RespondInfo* info)
 	initMessage(info);
 }
 
-void RespondCodec::initMessage(std::string enc)
+void RespondCodec::initMessage(string enc)
 {
 	m_encStr = enc;
 }

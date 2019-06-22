@@ -65,6 +65,7 @@ bool ClientOP::seckeyAgree()
 	string sh1 = hash.result();			//公钥信息strBuf加密
 	reqInfo.sign = crypto.rsaSign(sh1);//将得到的公钥加密信息sh1进行签名sign
 	cout << "签名成功" << "公钥信息" << endl;
+	//cout << "签名信息reqInfo.sign为 " << reqInfo.sign << endl;
 	//获取给服务器发送的数据 rsa公钥
 	reqInfo.data = strBuf.str();
 	cout << reqInfo.data << endl;//打印公钥信息
@@ -73,6 +74,7 @@ bool ClientOP::seckeyAgree()
 	Codec* codec = factory->createCodec();
 	string encodeMsg = codec->encodeMsg();//将得到的公钥信息reqInfo进行编码encodeMsg
 	cout << "数据编码完成。。。。" << endl;
+	cout << "encode Msg为" << endl << encodeMsg << endl;
 	delete factory;
 	delete codec;
 
@@ -81,13 +83,15 @@ bool ClientOP::seckeyAgree()
 	cout << "开始连接服务器" << endl;
 	TcpSocket* socket = new TcpSocket();
 	//连接
-	cout << "连接数据库" << endl;
+	cout << "连接端口和IP" << endl;//127.0.0.1  8989
+	cout << "m_info.serverIP" << m_info.serverIP << " m_info.port" << m_info.port << endl;
 	socket->connectToHost(m_info.serverIP, m_info.port);
 	//发送数据
 	cout << "发送数据" << endl;
-	cout << "发送的内容为" << encodeMsg << endl;
+	cout << "发送的内容为 " << encodeMsg << endl;
 	socket->sendMsg(encodeMsg);
 	//等待接收数据
+	cout << "等待接收数据" << endl;
 	string recvMsg = socket->recvMsg();
 
 	//3解码服务器回复的数据

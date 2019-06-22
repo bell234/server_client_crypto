@@ -28,7 +28,8 @@ int TcpSocket::connectToHost(string ip, unsigned short port, int timeOut) {
 	int ret = 0;
 	if (port <= 0 || port > 65535 || timeOut < 0) {
 		printf("(port <= 0 || port > 65535 || timeOut < 0) error!\n");
-		return ret = 0;
+		ret = ParamError;
+		return ret;
 	}
 	//新建套接字
 	if (0 > (this->m_socket = socket(AF_INET, SOCK_STREAM, 0))) {
@@ -50,7 +51,7 @@ int TcpSocket::connectToHost(string ip, unsigned short port, int timeOut) {
 	serverAddr.sin_port = htons(port);
 	serverAddr.sin_addr.s_addr = inet_addr(ip.data());
 	//建立连接
-	if (0 > (ret = connectTimeOut((struct sockaddr_in*) & serverAddr, (unsigned int)timeOut))) {
+	if (0 > (ret = connectTimeOut((struct sockaddr_in*) (&serverAddr), (unsigned int)timeOut))) {
 		//超时
 		if (ret == -1 && errno == ETIMEDOUT) {
 			ret = TimeOutError;
@@ -153,6 +154,8 @@ string TcpSocket::recvMsg(int timeOut) {
 	}
 	tmpBuf[n] = '\0';//数组尾部补0
 	string data = string(tmpBuf);
+	free(tmpBuf);
+
 	return data;
 }
 //断开连接
@@ -201,10 +204,10 @@ int TcpSocket::readTimeOut(unsigned int wait_seconds) {
 		timeout.tv_sec = wait_seconds;
 		timeout.tv_usec = 0;
 		do {
-			ret = select(this->m_socket + 1, NULL, &readTimeOutSet, NULL, &timeout);
+			ret = select(this->m_socket + 1, &readTimeOutSet, NULL, NULL, &timeout);
 		} while (ret < 0 && errno == EINTR);
 		
-		if (ret == -1) {
+		if (ret == 1) {
 			return 0;
 		}
 		else if (ret == 0) {
@@ -253,7 +256,7 @@ int TcpSocket::connectTimeOut(struct sockaddr_in* addr, unsigned int wait_second
 	if (wait_seconds > 0) {
 		setNonBlock(this->m_socket);
 	}
-	sockLen = sizeof(sockaddr_in);
+	sockLen = sizeof(struct sockaddr_in);
 	ret = connect(this->m_socket, (struct sockaddr*)addr, sockLen);
 	//设置为非阻塞连接返回-1并且errno=EINPROGRESS表示连接进行中
 	if (ret < 0 && errno == EINPROGRESS) {
@@ -334,17 +337,18 @@ int TcpSocket::writen(const void* buf, int count) {
 	size_t dataWrite;
 	char* tmpBuf = (char*)buf;
 	while (dataLeft > 0) {
-		if ((dataLeft = write(this->m_socket, tmpBuf, dataLeft))< 0) {
+		if ((dataWrite = write(this->m_socket, tmpBuf, dataLeft))< 0) {
 			if (errno == EINTR) {
 				continue;
 			}
 			return -1;
 		}
-		else if (dataLeft == 0) {
-			return count - dataLeft;
+		else if (dataWrite == 0) {
+			//return count - dataLeft;
+			continue;
 		}
 		tmpBuf += dataWrite;
-		dataLeft = dataWrite;
+		dataLeft -= dataWrite;
 	}
 	return count;
 }

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <iostream>
 #include <string>
 #include <sys/ipc.h>
@@ -6,7 +6,7 @@
 #include <string.h>
 #include "BaseShm.h"
 
-//´æ´¢½Úµã¹²ÏíÄÚ´æĞÅÏ¢
+//å­˜å‚¨èŠ‚ç‚¹å…±äº«å†…å­˜ä¿¡æ¯
 class NodeSHMInfo {
 public:
 	NodeSHMInfo() :status(0), seckeyID(0) {
@@ -14,19 +14,19 @@ public:
 		bzero(serverID, sizeof(serverID));
 		bzero(seckey, sizeof(seckey));
 	}
-	int status;//Éí·İ
-	int seckeyID;//ÃÜÔ¿ID
-	char clientID[12];//¿Í»§¶Ë
-	char serverID[12];//·şÎñÆ÷
-	char seckey[128];//ÃÜÔ¿
+	int status;//èº«ä»½
+	int seckeyID;//å¯†é’¥ID
+	char clientID[12];//å®¢æˆ·ç«¯
+	char serverID[12];//æœåŠ¡å™¨
+	char seckey[128];//å¯†é’¥
 };
 
 class SecKeyShm :public BaseShm
 {
 public:
-	SecKeyShm(int key);
+	//SecKeyShm(int key);
 	SecKeyShm(int key, int maxNode);
-	SecKeyShm(string pathName);
+	//SecKeyShm(string pathName);
 	SecKeyShm(string pathName, int maxNode);
 	~SecKeyShm();
 
@@ -34,6 +34,6 @@ public:
 	int shmWrite(NodeSHMInfo* pNodeInfo);
 	NodeSHMInfo shmRead(string clientID, string serverID);
 private:
-	int m_maxNode;//¹²ÏíÄÚ´æ×î´ó³¤¶È
+	int m_maxNode;//å…±äº«å†…å­˜æœ€å¤§é•¿åº¦
 };
 

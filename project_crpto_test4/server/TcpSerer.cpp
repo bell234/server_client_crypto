@@ -32,7 +32,7 @@ int TcpServer::setListen(unsigned short port, const char* ip) {
 		return ret;
 	}
 	//端口复用
-	int op = 0;
+	int op = 1;
 	if (-1 == (ret = setsockopt(this->m_lfd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int)))) {
 		ret = errno;
 		printf("func func TcpServer::setListen setsockopt(this->m_socket, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(int))error : %d\n", ret);
@@ -83,7 +83,8 @@ TcpSocket* TcpServer::acceptConnectSelect(int wait_seconds) {
 		timeout.tv_sec = wait_seconds;
 		timeout.tv_usec = 0;
 
-		do {
+		do 
+		{
 			ret = select(this->m_lfd + 1, &accept_fdset, NULL, NULL, &timeout);
 		} while (ret < 0 && errno == EINTR);
 		if (ret <= 0) {

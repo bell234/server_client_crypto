@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CodecFactory.h"
 #include "RespondCodec.h"
 #include <iostream>
@@ -10,10 +10,10 @@ class RespondFactory :
 	public CodecFactory
 {
 public:
-	RespondFactory();
+	//RespondFactory();
 	RespondFactory(string enc);
 	RespondFactory(RespondInfo* info);
-	Codec* create();
+	Codec* createCodec();
 
 	~RespondFactory();
 private:

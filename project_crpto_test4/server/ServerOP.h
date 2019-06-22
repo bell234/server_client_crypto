@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include "SecKeyShm.h"
 #include "msg.pb.h"
 using namespace std;
 
@@ -40,7 +41,7 @@ public:
 
 	// 根据协商结果创建 线程的回调函数2种方式
 	friend void* working(void* arg);
-	static void* hardWork(void* arg) {}
+	//static void* hardWork(void* arg) { return NULL; }
 
 	//密钥校验
 	string seckeyVertify(RequestMsg* msg);//check;

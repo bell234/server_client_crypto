@@ -1,18 +1,18 @@
-#include "RequestFactory.h"
+﻿#include "RequestFactory.h"
 
 
 
-RequestFactory::RequestFactory()
-{
-}
+//RequestFactory::RequestFactory()
+//{
+//}
 
 
-RequestFactory::RequestFactory(string enc)
+RequestFactory::RequestFactory(string enc):CodecFactory()
 {
 	m_flag = false;
 	m_encStr = enc;
 }
-RequestFactory::RequestFactory(RequestInfo *info)
+RequestFactory::RequestFactory(RequestInfo *info):CodecFactory()
 {
 	m_flag = true;
 	m_info = info;

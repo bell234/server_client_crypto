@@ -1,4 +1,4 @@
-#include "AesCrypto.h"
+ï»¿#include "AesCrypto.h"
 
 
 //AES_KEY m_encKey;
@@ -6,18 +6,18 @@
 //string m_key;
 
 
-//¶Ô³Æ¼ÓÃÜ
-//==>   m_key Ô­Ê¼ÃÜÔ¿×Ö·û´®
-//		m_encKey¼ÓÃÜÃÜÔ¿
-//		m_decKey½âÃÜÃÜÔ¿
-AesCrypto::AesCrypto(string key)//ÃÜÔ¿×Ö·û´®
+//å¯¹ç§°åŠ å¯†
+//==>   m_key åŸå§‹å¯†é’¥å­—ç¬¦ä¸²
+//		m_encKeyåŠ å¯†å¯†é’¥
+//		m_decKeyè§£å¯†å¯†é’¥
+AesCrypto::AesCrypto(string key)//å¯†é’¥å­—ç¬¦ä¸²
 {
 	if (key.size() == 16 || key.size() == 24 || key.size() == 32) {
 		const unsigned char* aesKey = (const unsigned char*)key.data();
-		//¼ÓÃÜ/½âÃÜ         ÃÜÔ¿×Ö·û´®   ÃÜÔ¿³¤¶È    ´«³ö²ÎÊı£º±£´æÉèÖÃÃÜÔ¿ĞÅÏ¢
+		//åŠ å¯†/è§£å¯†         å¯†é’¥å­—ç¬¦ä¸²   å¯†é’¥é•¿åº¦    ä¼ å‡ºå‚æ•°ï¼šä¿å­˜è®¾ç½®å¯†é’¥ä¿¡æ¯
 		AES_set_encrypt_key(aesKey, key.size() * 8, &m_encKey);
 		AES_set_decrypt_key(aesKey, key.size() * 8, &m_decKey);
-		this->m_key = key;//Ô­Ê¼ÃÜÔ¿×Ö·û´®
+		this->m_key = key;//åŸå§‹å¯†é’¥å­—ç¬¦ä¸²
 	}
 	
 }
@@ -38,9 +38,9 @@ string AesCrypto::aesCBCDecrypt(string encStr)
 							//0
 	return aesCrypto(encStr, AES_DECRYPT);
 }
-//¸ù¾İ´«À´µÄÊı¾İÅĞ¶¨ÊÇ¼ÓÃÜ»¹ÊÇ½âÃÜ
+//æ ¹æ®ä¼ æ¥çš„æ•°æ®åˆ¤å®šæ˜¯åŠ å¯†è¿˜æ˜¯è§£å¯†
 string AesCrypto::aesCrypto(string data, int crypto)
-{	//ÅĞ¶ÏÊÇ¼ÓÃÜÃÜÔ¿»¹ÊÇ½âÃÜÃÜÔ¿
+{	//åˆ¤æ–­æ˜¯åŠ å¯†å¯†é’¥è¿˜æ˜¯è§£å¯†å¯†é’¥
 	AES_KEY* key = crypto == AES_ENCRYPT ? &m_encKey : &m_decKey;
 	unsigned char ivec[AES_BLOCK_SIZE] = { 0 };//16
 	int length = data.size() + 1;
@@ -48,18 +48,18 @@ string AesCrypto::aesCrypto(string data, int crypto)
 		length = (length / 16 + 1) * 16;
 	}
 	char* out = new char[length];
-	generateIvec(ivec);//ÄæÖÃÔ­Ê¼Êı¾İ==>ÃÜÔ¿
+	generateIvec(ivec);//é€†ç½®åŸå§‹æ•°æ®==>å¯†é’¥
 
-	//CBC·½Ê½¼ÓÃÜ/½âÃÜ
-	//1Òª¼ÓÃÜ/½âÃÜµÄÊı¾İ    2ÃÜÎÄ/ÃúÎÄ   3Êı¾İ³¤¶È
-	//4ÃÜÔ¿
-	//5ivec³õÊ¼»¯×Ö·û´®, ºÍµÚÒ»¸öÃ÷ÎÄ·Ö×é½øĞĞÎ»ÔËËã, 	
-	//	È¡16¸ö×Ö·û¼Ó½âÃÜµÄÊ±ºò±£Ö¤¸ÃÊı×éÖĞµÄÊı¾İÍêÈ«ÏàÍ¬
-	//6¼Ó/½âÃÜ±êÖ¾
+	//CBCæ–¹å¼åŠ å¯†/è§£å¯†
+	//1è¦åŠ å¯†/è§£å¯†çš„æ•°æ®    2å¯†æ–‡/é“­æ–‡   3æ•°æ®é•¿åº¦
+	//4å¯†é’¥
+	//5ivecåˆå§‹åŒ–å­—ç¬¦ä¸², å’Œç¬¬ä¸€ä¸ªæ˜æ–‡åˆ†ç»„è¿›è¡Œä½è¿ç®—, 	
+	//	å–16ä¸ªå­—ç¬¦åŠ è§£å¯†çš„æ—¶å€™ä¿è¯è¯¥æ•°ç»„ä¸­çš„æ•°æ®å®Œå…¨ç›¸åŒ
+	//6åŠ /è§£å¯†æ ‡å¿—
 	AES_cbc_encrypt((const unsigned char*)data.c_str(),
 		(unsigned char*)out, length, key, ivec, crypto);
 	string retStr = string(out);
-	delete(out);
+	delete [] out;
 
 	return string(retStr);
 }
@@ -68,7 +68,7 @@ void AesCrypto::generateIvec(unsigned char* ivec)
 {
 						//16
 	for (int i = 0; i < AES_BLOCK_SIZE; ++i) {
-				//Ô­Ê¼ÃÜÔ¿×Ö·û´®
+				//åŸå§‹å¯†é’¥å­—ç¬¦ä¸²
 		ivec[i] = m_key.at(AES_BLOCK_SIZE - i - 1);
 	}
 }

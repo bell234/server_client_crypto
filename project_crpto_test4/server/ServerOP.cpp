@@ -136,7 +136,7 @@ string ServerOP::seckeyArgee(RequestMsg* msg)
 	ofs.close();
 
 	cout << "磁盘上生成了公钥文件。。。" << endl;
-	cout << "fileName" << fileName << endl;
+	cout << "fileName" << endl <<  fileName << endl;
 	RSACrypto rsa(fileName, false);//false为公钥
 	//2校验签名
 	//保证rsa对象中公钥是可用的

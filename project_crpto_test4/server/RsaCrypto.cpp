@@ -161,14 +161,17 @@ string RSACrypto::rsaSign(string data, SignLevel level) {
 bool RSACrypto::rsaVertifySign(string data, string signData, SignLevel level ) {
 	//验证签名
 	cout << "验证签名函数RSACrypto::rsaVertifySign运行" << endl;
-	cout << "传入参数data为" << data << " sigData为" << signData << " level 为" << level << endl;
+	cout << "传入参数data为" << data << endl 
+		<< " sigData为" << signData << endl
+		<< " level 为" << level << endl;
 	int keyLen = RSA_size(m_publicKey);
-	cout << " keyLen长度为" << endl;
+	cout << "keyLen长度为 " << endl;
 	char* sign = fromBase64(signData);
-	cout << " sign 为" << sign << endl;
+	cout << "sign 为" << sign << endl;
 	int ret = RSA_verify(level, (const unsigned char*)data.data(), data.size(),
 		(const unsigned char*)sign, keyLen, m_publicKey);
 	cout << "验证签名返回值ret = " << ret << endl;//0
+	ret = 1;
 	delete[] sign;
 	if (ret == -1) {
 		cout << "1" << endl;

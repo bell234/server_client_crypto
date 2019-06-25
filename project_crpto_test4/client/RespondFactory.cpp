@@ -1,10 +1,10 @@
-#include "RespondFactory.h"
+﻿#include "RespondFactory.h"
 
 
 
-RespondFactory::RespondFactory()
-{
-}
+//RespondFactory::RespondFactory()
+//{
+//}
 
 RespondFactory::RespondFactory(string enc)
 {
@@ -18,7 +18,7 @@ RespondFactory::RespondFactory(RespondInfo* info)
 	m_info = info;
 }
 
-Codec* RespondFactory::create()
+Codec* RespondFactory::createCodec()
 {
 	Codec* codec = NULL;
 	if (m_flag) {

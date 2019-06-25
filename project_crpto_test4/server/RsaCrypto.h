@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <iostream>
 #include <string>
 #include <openssl/rsa.h>
@@ -23,28 +23,28 @@ public:
 	RSACrypto(string fileName, bool isPrivate = true);
 	~RSACrypto();
 
-	//Í¨¹ı½âÎö×Ö·û´®µÃµ½ÃÜÔ¿
+	//é€šè¿‡è§£æå­—ç¬¦ä¸²å¾—åˆ°å¯†é’¥
 	void parseKeyString(string keystr, bool pubkey = true);
-	//Éú³ÉRSAÃÜÔ¿¶Ô
+	//ç”ŸæˆRSAå¯†é’¥å¯¹
 	void generateKeyFile(int bits, string pub = "public.pem", string pri = "private.pem");
-	//¹«Ô¿¼ÓÃÜ
+	//å…¬é’¥åŠ å¯†
 	string rsaPubKeyEncrypt(string data);
-	//Ë½Ô¿½âÃÜ
+	//ç§é’¥è§£å¯†
 	string rsaPriKeyDecrypt(string encData);
-	//Ê¹ÓÃRSAÇ©Ãû
+	//ä½¿ç”¨RSAç­¾å
 	string rsaSign(string data, SignLevel level = Level3);
-	//Ê¹ÓÃRSAÑéÖ¤Ç©Ãû
+	//ä½¿ç”¨RSAéªŒè¯ç­¾å
 	bool rsaVertifySign(string data, string signData, SignLevel level = Level3);
 private:
 	string toBase64(const char* str, int len);
-	//base64½âÂë
+	//base64è§£ç 
 	char* fromBase64(string str);
-	//»ñÈ¡¹«Ô¿
+	//è·å–å…¬é’¥
 	bool initPublicKey(string pubfile);
-	//»ñÈ¡Ë½Ô¿
+	//è·å–ç§é’¥
 	bool initPrivateKey(string prifile);
 
 private:
-	RSA* m_publicKey;//¹«Ô¿
-	RSA* m_privateKey;//Ë½Ô¿
+	RSA* m_publicKey;//å…¬é’¥
+	RSA* m_privateKey;//ç§é’¥
 };

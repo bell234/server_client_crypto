@@ -25,8 +25,11 @@ RSACrypto::RSACrypto(string fileName, bool isPrivate) {
 	if (isPrivate) {
 		initPrivateKey(fileName);
 	}
-	else {
-		initPublicKey(fileName);
+	else
+	{
+		bool a=initPublicKey(fileName);
+		cout << "33333333333333333333333333333333" << endl;
+		cout << a << endl;
 	}
 }
 //析构函数 释放申请的密钥的内存 
@@ -164,14 +167,16 @@ bool RSACrypto::rsaVertifySign(string data, string signData, SignLevel level ) {
 	cout << "传入参数data为" << data << endl 
 		<< " sigData为" << signData << endl
 		<< " level 为" << level << endl;
+	
 	int keyLen = RSA_size(m_publicKey);
-	cout << "keyLen长度为 " << endl;
+	cout << "m_publicKey值为" << m_publicKey << endl;
+	cout << "keyLen长度为 " << keyLen <<  endl;
 	char* sign = fromBase64(signData);
 	cout << "sign 为" << sign << endl;
 	int ret = RSA_verify(level, (const unsigned char*)data.data(), data.size(),
 		(const unsigned char*)sign, keyLen, m_publicKey);
 	cout << "验证签名返回值ret = " << ret << endl;//0
-	ret = 1;
+	//ret = 1;
 	delete[] sign;
 	if (ret == -1) {
 		cout << "1" << endl;
@@ -206,6 +211,7 @@ char* RSACrypto::fromBase64(string str)
 	BIO* bs64 = BIO_new(BIO_f_base64());
 	BIO* mem = BIO_new_mem_buf(str.data(), length);
 	BIO_push(bs64, mem);
+	cout << "frombase64长度为" << length << endl;
 	char* buffer = new char[length];
 	memset(buffer, 0, length);
 	BIO_read(bs64, buffer, length);
@@ -218,7 +224,10 @@ bool RSACrypto::initPublicKey(string pubfile) {
 	//创建bio对象			//操作的磁盘文件  操作文件的方式
 	BIO* pubBio = BIO_new_file(pubfile.data(), "r");
 	if ((PEM_read_bio_RSAPublicKey(pubBio, &m_publicKey, NULL, NULL)) == NULL) {
+		cout << "2222222222222222222" << endl;
 		ERR_print_errors_fp(stdout);
+		cout << "333333333333333333333" << endl;
+
 		return false;
 	}
 	BIO_free(pubBio);

@@ -144,7 +144,7 @@ string RSACrypto::rsaSign(string data, SignLevel level) {
 		(unsigned char*)signBuf, &len, m_privateKey);
 	cout << "sign length is 签名的长度：" << len << endl;
 
-	string retStr = string(signBuf, len);
+	string retStr = toBase64(signBuf, len);
 	delete[] signBuf;
 	return retStr;
 }

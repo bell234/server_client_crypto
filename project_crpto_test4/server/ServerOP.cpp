@@ -29,7 +29,9 @@ ServerOP::ServerOP(string jsonfile)
 	m_info.port = jsonValue["port"].asInt();
 	m_info.serverID = jsonValue["serverID"].asString();
 	m_info.shmKey = jsonValue["shmkey"].asString();
-	cout << "服务器读取内容为" << m_info.port << m_info.serverID << endl;
+	cout << "1服务器读取内容为 " << m_info.port << endl << m_info.serverID << endl
+		<< m_info.shmKey << endl << m_info.maxNode << endl << m_info.dbUser << endl
+		<< m_info.dbSid << endl << m_info.dbPasswd << endl;
 }
 
 ServerOP::~ServerOP()
@@ -40,7 +42,7 @@ ServerOP::~ServerOP()
 void ServerOP::startServer()
 {
 	//创建tcpserver对象
-	cout << "开始监听操作" << endl;
+	cout << "2开始监听操作" << endl;
 	m_server = new TcpServer();
 	m_server->setListen(m_info.port, NULL);
 	//接收连接请求
@@ -53,14 +55,14 @@ void ServerOP::startServer()
 		}
 		cout << "一次连接请求成功accept sucess!" << endl;
 		//通信
-		cout << "准备通信" << endl;
+		cout << "3准备通信" << endl;
 		pthread_t tid;
-		cout << "创建线程处理通信动作" << endl;
+		cout << "4创建线程处理通信动作" << endl;
 		pthread_create(&tid, NULL, working, this);
 		cout << "设置线程分离" << endl;
 		pthread_detach(tid);
 		//将通信套接字放在容器中
-		cout << "将套接字插入容器中" << endl;
+		cout << "5将套接字插入容器中" << endl;
 		m_socket.insert(make_pair(tid, pSocket));
 	}
 
@@ -73,27 +75,27 @@ void* working(void* arg)
 	//得到通信套接字
 	ServerOP* op = (ServerOP*)arg;
 	//得到通信的套接字对象
+	
 	TcpSocket* pSocket = op->m_socket[pthread_self()];
+	cout << "6得到socket对象" << op->m_socket[pthread_self()] << endl;
 	//接收数据-->编码之后
-	cout << "接受数据" << endl;
 	string recvMsg = pSocket->recvMsg();
-	cout << recvMsg << endl;
+	cout << "7接收的数据内容为" << endl <<  recvMsg << endl;
 
 	//对接收的数据进行解码
-	cout << "接受数据解码" << endl;
+	cout << "8接受数据解码" << endl;
 	CodecFactory* factory = new RequestFactory(recvMsg);
 	Codec* codec = factory->createCodec();
 	RequestMsg* reqMsg = (RequestMsg*)codec->decodeMsg();//通过网络接口传来结构
-
 	//根据cmd判断客户端请求
 	string str;
-	cout << "客户请求为" << reqMsg->cmdtype() << endl;
-	cout << "客户端的reqMsg " << reqMsg->data() << endl;
+	cout << "9客户请求命令为 " << reqMsg->cmdtype() << endl;
+	cout << "客户端的reqMsg 信息为： " << endl <<  reqMsg->data() << endl;
 	switch (reqMsg->cmdtype())
 	{
 	case 1:
 		//密钥协商
-		cout << "密钥协商功能实现" << endl;
+		cout << "10密钥协商功能实现" << endl;
 		str = op->seckeyArgee(reqMsg);
 		break;
 	case 2:
@@ -107,7 +109,7 @@ void* working(void* arg)
 		//str = op->seckeyArgee(reqMsg);
 		break;
 	}
-	cout << "发送数据给客户端" << endl;
+	cout << "发送数据给客户端内容为" << endl << str <<  endl;
 	pSocket->sendMsg(str);
 	cout << "数据已经发送给了客户端。。。" << endl;
 
@@ -143,6 +145,25 @@ string ServerOP::seckeyArgee(RequestMsg* msg)
 	RespondInfo info;
 	Hash sha1(T_SHA1);
 	sha1.addData(msg->data());
+	sha1.result();
+
+#include "RsaCrypto.h"
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/buffer.h>
+#include <string.h>
+#include <iostream>
+	int keyLen = RSA_size(m_publicKey);
+	char* sign = fromBase64(signData);
+	int ret = RSA_verify(level, (const unsigned char*)data.data(), data.size(),
+		(const unsigned char*)sign, keyLen, m_publicKey);
+	cout << "验证签名返回值ret = " << ret << endl;//0
+	//ret = 1;
+	delete[] sign;
+	
+	
+
+
 	bool b1 = rsa.rsaVertifySign(sha1.result(), msg->sign());
 	if (b1 == false) {
 		cout << "签名校验失败。。。" << endl;

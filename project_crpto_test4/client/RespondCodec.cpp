@@ -1,4 +1,4 @@
-#include "RespondCodec.h"
+﻿#include "RespondCodec.h"
 #include <iostream>
 
 using namespace std;
@@ -42,6 +42,8 @@ string RespondCodec::encodeMsg()
 
 void* RespondCodec::decodeMsg()
 {
+	cout << "1111111111111111111111111" << endl;
+
 	m_msg.ParseFromString(m_encStr);
 	return &m_msg;
 }
